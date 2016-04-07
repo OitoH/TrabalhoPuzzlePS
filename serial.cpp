@@ -1,7 +1,12 @@
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 using namespace std;
+
+int posx(int k){ return floor((k-1)/n); }
+int posy(int k){ return (k-1)%n; }
+int num(int i, int j){ return n*i+j; }
 
 class puzzle {
 	int tam;
@@ -16,8 +21,22 @@ class puzzle {
 	void in() {}
 
 	bool check_solve() {}
+	
+	private void manhattan_update(int x, int y) {
+		distances[x][y] = abs(x-posx(table[x][y])) + abs(y-posy(table[x][y]));
+	}
 
-	int manhattan_dist() {}
+	int manhattan_dist() {
+		int i, j;
+		int d=0;
+		for(i=0; i<n;i++){
+			for(j=0;j<n;j++){
+				manhattan_update(i, j);
+				d+=distances[i][j];
+			}
+		}
+		return d;
+	}
 
 	int move_zero(char dir) {
 		int num;
@@ -58,7 +77,7 @@ class puzzle {
 		return 0;
 	}
 
-	private void manhattan_update(int x, int y) {}
+	
 }
 
 int main(){
