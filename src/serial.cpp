@@ -4,29 +4,33 @@
 
 using namespace std;
 
-int posx(int k){ return floor((k-1)/n); }
-int posy(int k){ return (k-1)%n; }
-int num(int i, int j){ return n*i+j; }
-
 class puzzle {
 
 public:
 
+	int properLine(int pieceNum){ return floor((pieceNum - 1) / tam); }
+
+	int properColumn(int pieceNum){ return (pieceNum - 1) % tam ; }
+
+	int pieceNum(int column, int line){ return tam * line + column + 1; }
+
 	puzzle(int tam) {
-		this.tam = tam;
+		this->tam = tam;
 	}
 
 	void in() {}
 
 	bool check_solve() {
-		return ((tam%2==1)&&(inversion()%2==0)||((n%2==0)&&((tam-posx0)%2==1)==(inversion()%2==0)); // FORMULA DE SOLUCIONABILIDADE
+		return ( ((tam % 2 == 1) && (inversion() % 2 == 0)) ||
+			     ((tam % 2==0) && ((tam - posx0) % 2 == 1) == (inversion() % 2 == 0))
+			   ); // FORMULA DE SOLUCIONABILIDADE
 	}
 
 	int manhattan_dist() {
 		int i, j;
 		int d=0;
-		for(i=0; i<n;i++){
-			for(j=0;j<n;j++){
+		for(i=0; i<tam;i++){
+			for(j=0;j<tam;j++){
 				manhattan_update(i, j);
 				d+=distances[i][j];
 			}
@@ -70,28 +74,28 @@ public:
 			manhattan_update(posx0-1, posy0);
 		}
 
-		int inversion(){
-			int i, j;
-			int auxi, auxj;
-			int inv = 0;
-			for(i=0; i<tam*tam; i++){
-				for(j=i; j<tam*tam; j++){
-					auxj = table[posx(j)][posy(j)];
-					auxi = table[posx(i)][posy(j)];
-					if(auxj<auxi && auxj!=0){
-						inv++;
-					}
+		return 0;
+	}
+
+	int inversion(){
+		int i, j;
+		int auxi, auxj;
+		int inv = 0;
+		for(i=0; i<tam*tam; i++){
+			for(j=i; j<tam*tam; j++){
+				auxj = table[properLine(j)][properColumn(j)];
+				auxi = table[properLine(i)][properColumn(j)];
+				if(auxj<auxi && auxj!=0){
+					inv++;
 				}
 			}
-			return inv;
 		}
-
-		return 0;
+		return inv;
 	}
 
 private:
 	void manhattan_update(int x, int y) {
-		distances[x][y] = abs(x-posx(table[x][y])) + abs(y-posy(table[x][y]));
+		distances[x][y] = abs(x-properLine(table[x][y])) + abs(y-properColumn(table[x][y]));
 	}
 
 	int tam;
