@@ -9,11 +9,9 @@ int posy(int k){ return (k-1)%n; }
 int num(int i, int j){ return n*i+j; }
 
 class puzzle {
-	int tam;
-	int posx0, posy0;
-	vector<vector<int>> table;
-	vector<vector<int>> distances;
-	
+
+public:
+
 	puzzle(int tam) {
 		this.tam = tam;
 	}
@@ -21,10 +19,6 @@ class puzzle {
 	void in() {}
 
 	bool check_solve() {}
-	
-	private void manhattan_update(int x, int y) {
-		distances[x][y] = abs(x-posx(table[x][y])) + abs(y-posy(table[x][y]));
-	}
 
 	int manhattan_dist() {
 		int i, j;
@@ -77,8 +71,16 @@ class puzzle {
 		return 0;
 	}
 
-	
-}
+private:
+	void manhattan_update(int x, int y) {
+		distances[x][y] = abs(x-posx(table[x][y])) + abs(y-posy(table[x][y]));
+	}
+
+	int tam;
+	int posx0, posy0;
+	vector<vector<int>> table;
+	vector<vector<int>> distances;
+};
 
 int main(){
 	int tam;
@@ -90,9 +92,11 @@ int main(){
 	original.in();
 
 	if(!original.check_solve()){
-		cout("Nao ha solucao para esse caso. :(\n");
+		cout << "Nao ha solucao para esse caso, chupa essa manga!" << endl;
 		return 0;
 	}
+
+	//TODO: Programa aqui
 
 	return 0;
 }
