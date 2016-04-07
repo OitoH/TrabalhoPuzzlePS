@@ -18,7 +18,9 @@ public:
 
 	void in() {}
 
-	bool check_solve() {}
+	bool check_solve() {
+		return ((tam%2==1)&&(inversion()%2==0)||((n%2==0)&&((tam-posx0)%2==1)==(inversion()%2==0)); // FORMULA DE SOLUCIONABILIDADE
+	}
 
 	int manhattan_dist() {
 		int i, j;
@@ -66,6 +68,22 @@ public:
 			posy0++;
 			table[posx0][posy0] = 0;
 			manhattan_update(posx0-1, posy0);
+		}
+
+		int inversion(){
+			int i, j;
+			int auxi, auxj;
+			int inv = 0;
+			for(i=0; i<tam*tam; i++){
+				for(j=i; j<tam*tam; j++){
+					auxj = table[posx(j)][posy(j)];
+					auxi = table[posx(i)][posy(j)];
+					if(auxj<auxi && auxj!=0){
+						inv++;
+					}
+				}
+			}
+			return inv;
 		}
 
 		return 0;
