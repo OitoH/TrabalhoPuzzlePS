@@ -11,29 +11,29 @@ int main(){
 
 	// puzzle original(tam);
 
-	/*puzzle original { // Caso teste: não solucinável.
+	/*
+	puzzle original { // Caso teste: não solucinável.
 			{0, 3},
 			{1, 2}
 	};
-	*/
-
+/*
 	 puzzle original { // Caso teste: solucionado.
 	 	{1, 2},
 	 	{3, 0}
 	 };
-
-
-	/* puzzle original { // Caso teste: solucionável, solcuionável em 1  movimento.
-	 *		{1, 2},
-	 *		{0, 3}
-	 * };
 	 */
 
-	/* puzzle original { // Caso teste: pior configuração, 6 passos.
-	 * 		{0, 3},
-	 * 		{1, 1}
-	 * };
-	 */
+	puzzle original { // Caso teste: solucionável, solcuionável em 1  movimento.
+		{1, 2},
+		{0, 3}
+	 };
+
+	/*
+	puzzle original { // Caso teste: pior configuração, 6 passos.
+		{0, 3},
+		{1, 1}
+	};
+	*/
 
 	cout << "Quebra cabeça: \n" << original.toString();
 

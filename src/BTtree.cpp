@@ -27,8 +27,7 @@ void BTtree::startDeathRide()
 		puzzle::ZERO_UP,
 		puzzle::ZERO_DOWN,
 		puzzle::ZERO_LEFT,
-		puzzle::ZERO_RIGHT,
-		puzzle::ZERO_NONE
+		puzzle::ZERO_RIGHT
 	};
 	currentNode = rootNode;
 	while(currentNode->infos.manhattan_dist() != 0)
@@ -47,5 +46,5 @@ void BTtree::startDeathRide()
 
 bool BTtree::node::priorityCalculator::operator() (shared_ptr<BTtree::node> lhs, shared_ptr<BTtree::node> rhs) const
 {
-	return (lhs->infos.manhattan_dist() + lhs->depth) >= (rhs->infos.manhattan_dist() + rhs->depth);
+	return (lhs->infos.manhattan_dist() + lhs->depth / 2) >= (rhs->infos.manhattan_dist() + rhs->depth / 2);
 }

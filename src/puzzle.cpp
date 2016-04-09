@@ -146,13 +146,13 @@ bool puzzle::isMoveValid(enum zero_movement move)
 	switch(move)
 	{
 		case ZERO_UP:
-			return line0 == 0;
+			return line0 != 0;
 		case ZERO_DOWN:
-			return line0 == tam - 1;
+			return line0 != tam - 1;
 		case ZERO_LEFT:
-			return column0 == 0;
+			return column0 != 0;
 		case ZERO_RIGHT:
-			return column0 == tam - 1;
+			return column0 != tam - 1;
 		default:
 		break;
 	}
