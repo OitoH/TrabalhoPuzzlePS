@@ -11,8 +11,11 @@ OL = $(patsubst src/%.cpp, obj/%.o, $(CL) )  #object list
 
 all: $(OL); $(CC) $(CFLAGS) $(OL) $(LIBS) $(INCLUDE) -o main
 
-obj/%.o: src/%.cpp; $(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+obj:
+	mkdir -p obj
+
+obj/%.o: src/%.cpp obj; $(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 run: ; ./main
 
-clean: ; rm main obj/*.o
+clean: ; rm main $(wildcard obj/*.o)

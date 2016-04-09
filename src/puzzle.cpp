@@ -12,7 +12,10 @@ puzzle::puzzle(int tam)
 	// Aleatorizar peças.
 	for (i = tam * tam - 1; i > -1; --i)
 		random_pieces[i] = i;
-	random_shuffle(random_pieces.begin(), random_pieces.end());
+	shuffle(random_pieces.begin()
+		    , random_pieces.end()
+		    , default_random_engine(chrono::system_clock::now().time_since_epoch().count())
+		    );
 
 	// Aloca espaço no vetor (opcional, mas é mais rápido).
 	for (i = 0; i < tam; ++i)
@@ -54,7 +57,7 @@ int puzzle::pieceNum(int column, int line){ return tam * line + column + 1; }
 
 bool puzzle::check_solve() {
 	return ( ((tam % 2 == 1) && (inversion() % 2 == 0)) ||
-		     ((tam % 2 == 0) && ((tam - line0) % 2 == 1) == (inversion() % 2 == 0))
+		     ((tam % 2 == 0) && (((tam - line0) % 2 == 1) == (inversion() % 2 == 0)))
 		   ); // FORMULA DE SOLUCIONABILIDADE
 }
 
@@ -132,16 +135,14 @@ int puzzle::move_zero(enum zero_movement dir) {
 }
 
 int puzzle::inversion(){
-	int i, j;
-	int auxi, auxj;
+	int i, j, preceding, successor;
 	int inv = 0;
-	for(i=0; i<tam*tam; i++){
-		for(j=i; j<tam*tam; j++){
-			auxj = table[properLine(j)][properColumn(j)];
-			auxi = table[properLine(i)][properColumn(j)];
-			if(auxj<auxi && auxj!=0){
+	for(i = 1; i < tam * tam; i++) {
+		preceding = table[properLine(i)][properColumn(i)];
+		for(j = i + 1; j < tam * tam; j++) {
+			successor = table[properLine(j)][properColumn(j)];
+			if (successor != 0 && preceding > successor)
 				inv++;
-			}
 		}
 	}
 	return inv;
