@@ -22,18 +22,16 @@ int main(){
 	 	{3, 0}
 	 };
 	 */
-
+/*
 	puzzle original { // Caso teste: solucionável, solcuionável em 1  movimento.
 		{1, 2},
 		{0, 3}
 	 };
-
-	/*
+*/
 	puzzle original { // Caso teste: pior configuração, 6 passos.
 		{0, 3},
-		{1, 1}
+		{2, 1}
 	};
-	*/
 
 	cout << "Quebra cabeça: \n" << original.toString();
 
