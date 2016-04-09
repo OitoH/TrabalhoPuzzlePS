@@ -234,8 +234,12 @@ string puzzle::toString(){
 
 void puzzle::manhattan_update(int line, int column) {
 	int value = table[line][column];
+	int formerDistance = distances[line][column];
+
 	if (value == 0)
 		distances[line][column] = 0;
 	else
 		distances[line][column] = abs(line-properLine(value)) + abs(column-properColumn(value));
+
+	distance += distances[line][column] - formerDistance;
 }
