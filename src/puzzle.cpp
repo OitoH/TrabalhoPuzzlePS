@@ -1,5 +1,57 @@
 #include <puzzle.h>
 
+enum puzzle::zero_movement puzzle::oppositeMovement(enum puzzle::zero_movement dir)
+{
+	switch(dir)
+	{
+		case puzzle::ZERO_UP:
+			return puzzle::ZERO_DOWN;
+		case puzzle::ZERO_DOWN:
+			return puzzle::ZERO_UP;
+		case puzzle::ZERO_LEFT:
+			return puzzle::ZERO_RIGHT;
+		case puzzle::ZERO_RIGHT:
+			return puzzle::ZERO_LEFT;
+		default:
+			break;
+	}
+	return puzzle::ZERO_NONE;
+}
+
+puzzle::puzzle(const initializer_list<initializer_list<int>>& elementList)
+{
+	/* TODO: Verificar se os elementos estão entre 0 <= elemento <= tam * tam - 1
+	* e não há repetição de elementos
+	*/
+	int j, i = 0;
+	tam = elementList.size();
+	table.reserve(tam);
+	distances.reserve(tam);
+
+	for(auto& it: elementList)
+	{
+		if (it.size() != tam)
+			throw -1;
+
+		table[i].reserve(tam);
+		distances[i].reserve(tam);
+
+		j = 0;
+		for(auto piece: it)
+		{
+			if (piece == 0)
+			{
+				line0 = i;
+				column0 = j;
+			}
+			table[i][j] = piece;
+			++j;
+		}
+		++i;
+	}
+	compute_manhattan_dist();
+}
+
 puzzle::puzzle(int tam)
 	: table(tam)
 	, distances(tam)
@@ -38,18 +90,30 @@ puzzle::puzzle(int tam)
 			}
 		}
 	}
+	compute_manhattan_dist();
 }
 
 puzzle::puzzle(const puzzle &original)
-	: table(original.table)
-	, distances(original.distances)
+	: table(tam)
+	, distances(tam)
+	, tam(original.tam)
+	, line0(original.line0)
+	, column0(original.column0)
 {
-	tam = original.tam;
-	line0 = original.line0;
-	column0 = original.column0;
+	for (int i = 0; i < tam; ++i)
+	{
+		table[i].reserve(tam);
+		distances[i].reserve(tam);
+		for (int j = 0; j < tam; ++j)
+		{
+			table[i][j] = original.table[i][j];
+			distances[i][j] = original.distances[i][j];
+		}
+	}
+	compute_manhattan_dist();
 }
 
-int puzzle::properLine(int pieceNum){ return floor((pieceNum - 1) / tam); }
+int puzzle::properLine(int pieceNum){ return (pieceNum - 1) / tam; }
 
 int puzzle::properColumn(int pieceNum){ return (pieceNum - 1) % tam ; }
 
@@ -61,16 +125,20 @@ bool puzzle::check_solve() {
 		   ); // FORMULA DE SOLUCIONABILIDADE
 }
 
-int puzzle::manhattan_dist() {
+void puzzle::compute_manhattan_dist() {
 	int i, j;
-	int d=0;
-	for(i=0; i<tam;i++){
-		for(j=0;j<tam;j++){
+	distance = 0;
+	for(i = 0; i < tam; i++){
+		for(j = 0;j < tam; j++){
 			manhattan_update(i, j);
-			d+=distances[i][j];
+			distance += distances[i][j];
 		}
 	}
-	return d;
+}
+
+int puzzle::manhattan_dist() const
+{
+	return distance;
 }
 
 bool puzzle::isMoveValid(enum zero_movement move)
@@ -131,6 +199,7 @@ int puzzle::move_zero(enum zero_movement dir) {
 		default:
 			return -1;
 	}
+	manhattan_update(line0, column0);
 	return 0;
 }
 
@@ -164,5 +233,9 @@ string puzzle::toString(){
 }
 
 void puzzle::manhattan_update(int line, int column) {
-	distances[line][column] = abs(line-properLine(table[line][column])) + abs(column-properColumn(table[line][column]));
+	int value = table[line][column];
+	if (value == 0)
+		distances[line][column] = 0;
+	else
+		distances[line][column] = abs(line-properLine(value)) + abs(column-properColumn(value));
 }

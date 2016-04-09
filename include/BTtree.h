@@ -16,12 +16,12 @@ public:
 	public:
 		shared_ptr<node> father;
 		puzzle infos;
-		enum zero_movement movement;
+		enum puzzle::zero_movement movement;
 		int depth;
 
-		node(puzzle &copy);
+		node(const puzzle &copy);
 
-		node(shared_ptr<node> lastNode, enum zero_movement thisMovement);
+		node(shared_ptr<node> lastNode, enum puzzle::zero_movement thisMovement);
 
 		class priorityCalculator
 		{

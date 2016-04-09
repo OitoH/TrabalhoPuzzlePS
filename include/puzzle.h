@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <initializer_list>
 #include <random>
 #include <chrono>
 #include <string>
@@ -12,18 +13,22 @@
 
 using namespace std;
 
-enum zero_movement
-{
-	ZERO_UP,
-	ZERO_DOWN,
-	ZERO_LEFT,
-	ZERO_RIGHT,
-	ZERO_NONE
-};
-
 class puzzle {
 
 public:
+
+	enum zero_movement
+	{
+		ZERO_UP,
+		ZERO_DOWN,
+		ZERO_LEFT,
+		ZERO_RIGHT,
+		ZERO_NONE
+	};
+
+	static enum zero_movement oppositeMovement(enum zero_movement dir);
+
+	puzzle(const initializer_list<initializer_list<int>>& elementList);
 
 	puzzle(int tam);
 
@@ -37,9 +42,9 @@ public:
 
 	bool check_solve();
 
-	int manhattan_dist();
-
 	bool isMoveValid(enum zero_movement move);
+
+	int manhattan_dist() const;
 
 	int move_zero(enum zero_movement dir);
 
@@ -48,10 +53,12 @@ public:
 	string toString();
 
 private:
+	void compute_manhattan_dist();
 	void manhattan_update(int line, int column);
 
 	int tam;
 	int line0, column0;
+	int distance;
 	vector< vector<int> > table;
 	vector< vector<int> > distances;
 };
