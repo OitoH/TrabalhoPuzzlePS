@@ -36,5 +36,4 @@ public:
 
 private:
 	shared_ptr<node> rootNode, currentNode;
-	priority_queue<shared_ptr<node>, vector<shared_ptr<node>>, node::priorityCalculator> unexploredNodes;
 };

@@ -32,6 +32,8 @@ void BTtree::startDeathRide()
 	currentNode = rootNode;
 	while(currentNode->infos.manhattan_dist() != 0)
 	{
+		priority_queue<shared_ptr<node>, vector<shared_ptr<node>>, node::priorityCalculator> unexploredNodes;
+
 		// Realizar todos os movimentos possíveis no zero.
 		for (auto it: movements)
 			if (currentNode->movement != puzzle::oppositeMovement(it) && currentNode->infos.isMoveValid(it))

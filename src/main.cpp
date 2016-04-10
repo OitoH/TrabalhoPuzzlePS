@@ -7,9 +7,9 @@ using namespace std;
 int main(){
 	int tam;
 
-	// cin >> tam;
+	cin >> tam;
 
-	// puzzle original(tam);
+	puzzle original(tam);
 
 	/*
 	puzzle original { // Caso teste: não solucinável.
@@ -28,10 +28,12 @@ int main(){
 		{0, 3}
 	 };
 */
+/*
 	puzzle original { // Caso teste: pior configuração, 6 passos.
 		{0, 3},
 		{2, 1}
 	};
+*/
 
 	cout << "Quebra cabeça: \n" << original.toString();
 
