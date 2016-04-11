@@ -39,14 +39,14 @@ int main(){
 	};
         */
         
-        /*// SOLVABLE!
+        // SOLVABLE!
         puzzle original {
             {11, 6, 0, 8},
             {15, 4, 12, 7},
             {5, 9, 3, 2},
             {1, 14, 10, 13}            
         };
-        */
+
         
         
         /* // UNSOLVABLE!
@@ -59,12 +59,13 @@ int main(){
         */
         
         // SOLVABLE
+    /*
         puzzle original {
             {1, 0, 2},
             {3, 6, 5},
             {8, 7, 4}
         };
-        
+        */
         
         /* // UNSOLVABLE
         puzzle original {
