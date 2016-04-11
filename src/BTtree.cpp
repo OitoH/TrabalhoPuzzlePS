@@ -48,5 +48,6 @@ void BTtree::startDeathRide()
 
 bool BTtree::node::priorityCalculator::operator() (shared_ptr<BTtree::node> lhs, shared_ptr<BTtree::node> rhs) const
 {
-	return (lhs->infos.manhattan_dist() + lhs->depth / 2) >= (rhs->infos.manhattan_dist() + rhs->depth / 2);
+	//return (lhs->infos.manhattan_dist() + lhs->depth / 2) >= (rhs->infos.manhattan_dist() + rhs->depth / 2);
+    return (lhs->infos.manhattan_dist()) >= (rhs->infos.manhattan_dist());
 }

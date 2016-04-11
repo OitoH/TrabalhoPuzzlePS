@@ -208,12 +208,13 @@ int puzzle::inversion(){
 	int inv = 0;
 	for(i = 1; i < tam * tam; i++) {
 		preceding = table[properLine(i)][properColumn(i)];
-		for(j = i + 1; j < tam * tam; j++) {
+		for(j = i + 1; j <= tam * tam; j++) {
 			successor = table[properLine(j)][properColumn(j)];
 			if (successor != 0 && preceding > successor)
 				inv++;
 		}
 	}
+	std::cout << "inversions: " << inv << "\n";
 	return inv;
 }
 
