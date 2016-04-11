@@ -41,7 +41,7 @@ void BTtree::startDeathRide()
 		// Explora o nó de maior prioridade.
 		currentNode = unexploredNodes.top();
 		unexploredNodes.pop();
-        cout << "Next node\nDepth: " << currentNode->depth << "\n" << currentNode.toString();
+        cout << "Next node\nDepth: " << currentNode->depth << "\n" << currentNode->infos.toString() << endl;
 	}
 	cout << "Resultado:\n" << currentNode->infos.toString() << endl;
 }
