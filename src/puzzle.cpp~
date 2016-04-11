@@ -119,21 +119,10 @@ int puzzle::properColumn(int pieceNum){ return (pieceNum - 1) % tam ; }
 
 int puzzle::pieceNum(int column, int line){ return tam * line + column + 1; }
 
-/*
-Antigo:
 bool puzzle::check_solve() {
 	return ( ((tam % 2 == 1) && (inversion() % 2 == 0)) ||
 		     ((tam % 2 == 0) && (((tam - line0) % 2 == 1) == (inversion() % 2 == 0)))
 		   ); // FORMULA DE SOLUCIONABILIDADE
-}
-*/
-
-bool puzzle::check_solve() {
-	return (
-			((tam % 2 == 1) && (inversion() % 2 == 0)) ||
-			((tam % 2 == 0) && (inversion() % 2 == 1) && ((tam - line0) % 2 == 0)) ||
-			((tam % 2 == 0) && ((tam - line0) % 2 == 1))) ||
-		); // FORMULA DE SOLUCIONABILIDADE
 }
 
 void puzzle::compute_manhattan_dist() {
