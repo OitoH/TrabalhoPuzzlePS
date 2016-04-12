@@ -18,11 +18,8 @@ enum puzzle::zero_movement puzzle::oppositeMovement(enum puzzle::zero_movement d
 	return puzzle::ZERO_NONE;
 }
 
-puzzle::puzzle(const initializer_list<initializer_list<int>>& elementList)
+puzzle::puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementList)
 {
-	/* TODO: Verificar se os elementos estão entre 0 <= elemento <= tam * tam - 1
-	* e não há repetição de elementos
-	*/
 	int j, i = 0;
 	tam = elementList.size();
 	table.reserve(tam);
@@ -56,15 +53,17 @@ puzzle::puzzle(int tam)
 	: table(tam)
 	, distances(tam)
 {
-	int i, j, aux;
-	vector<int> random_pieces(tam * tam);
+    int i, j;
+    uint_fast8_t aux;
+    vector<uint_fast8_t> random_pieces(tam * tam);
 
 	this->tam = tam;
 
 	// Aleatorizar peças.
 	for (i = tam * tam - 1; i > -1; --i)
 		random_pieces[i] = i;
-	shuffle(random_pieces.begin()
+
+    shuffle(random_pieces.begin()
 		    , random_pieces.end()
 		    , default_random_engine(chrono::system_clock::now().time_since_epoch().count())
 		    );
@@ -235,8 +234,8 @@ string puzzle::toString(){
 }
 
 void puzzle::manhattan_update(int line, int column) {
-	int value = table[line][column];
-	int formerDistance = distances[line][column];
+    uint_fast8_t value = table[line][column];
+    uint_fast8_t formerDistance = distances[line][column];
 
 	if (value == 0)
 		distances[line][column] = 0;

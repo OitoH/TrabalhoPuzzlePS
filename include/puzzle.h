@@ -28,7 +28,7 @@ public:
 
 	static enum zero_movement oppositeMovement(enum zero_movement dir);
 
-	puzzle(const initializer_list<initializer_list<int>>& elementList);
+    puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementList);
 
 	puzzle(int tam);
 
