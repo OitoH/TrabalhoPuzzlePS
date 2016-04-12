@@ -109,8 +109,7 @@ puzzle::puzzle(const puzzle &original)
 			table[i][j] = original.table[i][j];
 			distances[i][j] = original.distances[i][j];
 		}
-	}
-	compute_manhattan_dist();
+    }
 }
 
 int puzzle::properLine(int pieceNum){ return (pieceNum - 1) / tam; }
