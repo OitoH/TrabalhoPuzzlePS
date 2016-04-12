@@ -4,7 +4,7 @@
 #include <queue>
 #include <memory>
 
-#include <puzzle.h>
+#include "../include/puzzle.h"
 
 using namespace std;
 

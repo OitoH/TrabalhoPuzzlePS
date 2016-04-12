@@ -3,6 +3,8 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
+LIBS += -fopenmp
+
 SOURCES += \
     src/BTtree.cpp \
     src/main.cpp \
@@ -10,7 +12,6 @@ SOURCES += \
 
 HEADERS += \
     include/BTtree.h \
-    include/puzzle.h
+    include/puzzle.h \
 
-DISTFILES += \
-    Makefile
+DISTFILES +=

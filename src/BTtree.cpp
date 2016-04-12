@@ -1,4 +1,4 @@
-#include <BTtree.h>
+#include "../include/BTtree.h"
 
 BTtree::node::node(const puzzle &copy)
 : infos(copy)
@@ -28,7 +28,7 @@ void BTtree::startDeathRide()
 		puzzle::ZERO_LEFT,
 		puzzle::ZERO_RIGHT
 	};
-	currentNode = rootNode;
+    currentNode = new node(rootNode->infos);
 	while(currentNode->infos.manhattan_dist() != 0)
     {
 		// Realizar todos os movimentos possíveis no zero.
@@ -59,5 +59,5 @@ bool BTtree::node::priorityCalculator::operator() (node *lhs, node *rhs) const
 
 BTtree::~BTtree()
 {
-    // TODO: Remvoer ponteiros.
+    delete rootNode;
 }

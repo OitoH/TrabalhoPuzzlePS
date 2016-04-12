@@ -1,4 +1,4 @@
-#include <puzzle.h>
+#include "../include/puzzle.h"
 
 enum puzzle::zero_movement puzzle::oppositeMovement(enum puzzle::zero_movement dir)
 {
@@ -19,31 +19,33 @@ enum puzzle::zero_movement puzzle::oppositeMovement(enum puzzle::zero_movement d
 }
 
 puzzle::puzzle(const initializer_list<initializer_list<int>>& elementList)
+    : tam(elementList.size())
+    , table(new int*[tam])
+    , distances(new int*[tam])
 {
-	/* TODO: Verificar se os elementos estão entre 0 <= elemento <= tam * tam - 1
-	* e não há repetição de elementos
-	*/
-	int j, i = 0;
-	tam = elementList.size();
-	table.reserve(tam);
-	distances.reserve(tam);
+    int j, i = 0;
+
+    unordered_set<int> numbersUsed;
+    numbersUsed.reserve(tam * tam);
 
 	for(auto& it: elementList)
 	{
-		if (it.size() != tam)
+        if (it.size() != tam) // Se a matriz não for n x n.
 			throw -1;
 
-		table[i].reserve(tam);
-		distances[i].reserve(tam);
+        table[i] = new int[tam];
+        distances[i] = new int[tam];
 
 		j = 0;
 		for(auto piece: it)
-		{
+        {
 			if (piece == 0)
 			{
 				line0 = i;
 				column0 = j;
 			}
+            else if (piece < 0 || piece >= tam * tam || numbersUsed.insert(piece).second == false) // Se o número da peça for inválida ou a peça já estiver no conjunto de peças usadas.
+                throw -1;
 			table[i][j] = piece;
 			++j;
 		}
@@ -52,14 +54,13 @@ puzzle::puzzle(const initializer_list<initializer_list<int>>& elementList)
 	compute_manhattan_dist();
 }
 
-puzzle::puzzle(int tam)
-	: table(tam)
-	, distances(tam)
+puzzle::puzzle(int desiredTam)
+    : tam(desiredTam)
+    , table(new int*[tam])
+    , distances(new int*[tam])
 {
 	int i, j, aux;
-	vector<int> random_pieces(tam * tam);
-
-	this->tam = tam;
+    vector<int> random_pieces(tam * tam);
 
 	// Aleatorizar peças.
 	for (i = tam * tam - 1; i > -1; --i)
@@ -69,11 +70,10 @@ puzzle::puzzle(int tam)
 		    , default_random_engine(chrono::system_clock::now().time_since_epoch().count())
 		    );
 
-	// Aloca espaço no vetor (opcional, mas é mais rápido).
 	for (i = 0; i < tam; ++i)
 	{
-		table[i].reserve(tam);
-		distances[i].reserve(tam);
+        table[i] = new int[tam];
+        distances[i] = new int[tam];
 	}
 
 	// Inicializa o quebra-cabeça com valores aleatórios.
@@ -94,23 +94,34 @@ puzzle::puzzle(int tam)
 }
 
 puzzle::puzzle(const puzzle &original)
-	: table(tam)
-	, distances(tam)
-	, tam(original.tam)
-	, line0(original.line0)
-	, column0(original.column0)
+    : tam(original.tam)
+    , line0(original.line0)
+    , column0(original.column0)
+    , distance(original.distance)
+    , table(new int*[tam])
+    , distances(new int*[tam])
 {
 	for (int i = 0; i < tam; ++i)
 	{
-		table[i].reserve(tam);
-		distances[i].reserve(tam);
+        table[i] = new int[tam];
+        distances[i] = new int[tam];
 		for (int j = 0; j < tam; ++j)
 		{
-			table[i][j] = original.table[i][j];
-			distances[i][j] = original.distances[i][j];
+            table[i][j] = original.table[i][j];
+            distances[i][j] = original.distances[i][j];
 		}
-	}
-	compute_manhattan_dist();
+    }
+}
+
+puzzle::~puzzle()
+{
+    for(int i = 0; i < tam; ++i)
+    {
+        delete table[i];
+        delete distances[i];
+    }
+    delete table;
+    delete distances;
 }
 
 int puzzle::properLine(int pieceNum){ return (pieceNum - 1) / tam; }
@@ -204,7 +215,8 @@ int puzzle::move_zero(enum zero_movement dir) {
 }
 
 int puzzle::inversion(){
-	int i, j, preceding, successor;
+    int i, j;
+    int preceding, successor;
 	int inv = 0;
 	for(i = 1; i < tam * tam; i++) {
 		preceding = table[properLine(i)][properColumn(i)];
@@ -235,8 +247,8 @@ string puzzle::toString(){
 }
 
 void puzzle::manhattan_update(int line, int column) {
-	int value = table[line][column];
-	int formerDistance = distances[line][column];
+    int value = table[line][column];
+    int formerDistance = distances[line][column];
 
 	if (value == 0)
 		distances[line][column] = 0;

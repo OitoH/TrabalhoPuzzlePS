@@ -8,6 +8,7 @@
 #include <chrono>
 #include <string>
 #include <sstream>
+#include <unordered_set>
 
 #include <cmath>
 
@@ -28,11 +29,13 @@ public:
 
 	static enum zero_movement oppositeMovement(enum zero_movement dir);
 
-	puzzle(const initializer_list<initializer_list<int>>& elementList);
+    puzzle(const initializer_list<initializer_list<int>>& elementList);
 
 	puzzle(int tam);
 
 	puzzle(const puzzle &original);
+
+    ~puzzle();
 
     int getTam();
 
@@ -59,9 +62,9 @@ private:
 	void compute_manhattan_dist();
 	void manhattan_update(int line, int column);
 
-	int tam;
+    int tam;
 	int line0, column0;
 	int distance;
-    vector< vector<uint_fast8_t> > table;
-    vector< vector<uint_fast8_t> > distances;
+    int **table;
+    int **distances;
 };
