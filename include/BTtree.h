@@ -31,7 +31,7 @@ public:
 
 	void startDeathRide();
 
-	BTtree(puzzle &original);
+    BTtree(const puzzle &original);
 
     ~BTtree();
 
