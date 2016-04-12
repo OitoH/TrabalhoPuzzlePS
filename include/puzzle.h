@@ -34,6 +34,8 @@ public:
 
 	puzzle(const puzzle &original);
 
+    ~puzzle();
+
     int getTam();
 
 	int properLine(int pieceNum);
@@ -62,6 +64,6 @@ private:
 	int tam;
 	int line0, column0;
     int totalDistance;
-    vector< vector<uint_fast8_t> > table;
-    vector< vector<uint_fast8_t> > distances;
+    uint_fast8_t **table;
+    uint_fast8_t **distances;
 };

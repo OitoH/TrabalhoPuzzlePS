@@ -20,8 +20,8 @@ enum puzzle::zero_movement puzzle::oppositeMovement(enum puzzle::zero_movement d
 
 puzzle::puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementList)
     : tam(elementList.size())
-    , table(tam)
-    , distances(tam)
+    , table(new uint_fast8_t*[tam])
+    , distances(new uint_fast8_t*[tam])
 {
     int j, i = 0;
 
@@ -30,8 +30,8 @@ puzzle::puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementLi
 		if (it.size() != tam)
 			throw -1;
 
-		table[i].reserve(tam);
-		distances[i].reserve(tam);
+        table[i] = new uint_fast8_t[tam];
+        distances[i] = new uint_fast8_t[tam];
 
 		j = 0;
 		for(auto piece: it)
@@ -50,8 +50,8 @@ puzzle::puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementLi
 }
 
 puzzle::puzzle(int tam)
-	: table(tam)
-	, distances(tam)
+    : table(new uint_fast8_t*[tam])
+    , distances(new uint_fast8_t*[tam])
 {
     int i, j;
     uint_fast8_t aux;
@@ -71,8 +71,8 @@ puzzle::puzzle(int tam)
 	// Aloca espaço no vetor (opcional, mas é mais rápido).
 	for (i = 0; i < tam; ++i)
 	{
-		table[i].reserve(tam);
-		distances[i].reserve(tam);
+        table[i] = new uint_fast8_t[tam];
+        distances[i] = new uint_fast8_t[tam];
 	}
 
 	// Inicializa o quebra-cabeça com valores aleatórios.
@@ -97,13 +97,13 @@ puzzle::puzzle(const puzzle &original)
     , line0(original.line0)
     , column0(original.column0)
     , totalDistance(0)
-    , table(tam)
-    , distances(tam)
+    , table(new uint_fast8_t*[tam])
+    , distances(new uint_fast8_t*[tam])
 {
 	for (int i = 0; i < tam; ++i)
 	{
-		table[i].reserve(tam);
-		distances[i].reserve(tam);
+        table[i] = new uint_fast8_t[tam];
+        distances[i] = new uint_fast8_t[tam];
 		for (int j = 0; j < tam; ++j)
 		{
 			table[i][j] = original.table[i][j];
@@ -111,6 +111,18 @@ puzzle::puzzle(const puzzle &original)
 		}
     }
     compute_manhattan_dist();
+}
+
+puzzle::~puzzle()
+{
+    int i;
+    for(i = 0; i < tam; i++)
+    {
+        delete [] table[i];
+        delete [] distances[i];
+    }
+    delete [] table;
+    delete [] distances;
 }
 
 int puzzle::properLine(int pieceNum){ return (pieceNum - 1) / tam; }
