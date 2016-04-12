@@ -96,7 +96,7 @@ puzzle::puzzle(const puzzle &original)
     : tam(original.tam)
     , line0(original.line0)
     , column0(original.column0)
-    , totalDistance(original.totalDistance)
+    , totalDistance(0)
     , table(tam)
     , distances(tam)
 {
@@ -110,6 +110,7 @@ puzzle::puzzle(const puzzle &original)
 			distances[i][j] = original.distances[i][j];
 		}
     }
+    compute_manhattan_dist();
 }
 
 int puzzle::properLine(int pieceNum){ return (pieceNum - 1) / tam; }
