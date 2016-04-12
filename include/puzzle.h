@@ -61,7 +61,7 @@ private:
 
 	int tam;
 	int line0, column0;
-	int distance;
+    int totalDistance;
     vector< vector<uint_fast8_t> > table;
     vector< vector<uint_fast8_t> > distances;
 };

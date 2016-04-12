@@ -19,11 +19,11 @@ enum puzzle::zero_movement puzzle::oppositeMovement(enum puzzle::zero_movement d
 }
 
 puzzle::puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementList)
+    : tam(elementList.size())
+    , table(tam)
+    , distances(tam)
 {
-	int j, i = 0;
-	tam = elementList.size();
-	table.reserve(tam);
-	distances.reserve(tam);
+    int j, i = 0;
 
 	for(auto& it: elementList)
 	{
@@ -94,10 +94,11 @@ puzzle::puzzle(int tam)
 
 puzzle::puzzle(const puzzle &original)
     : tam(original.tam)
+    , line0(original.line0)
+    , column0(original.column0)
+    , totalDistance(original.totalDistance)
     , table(tam)
     , distances(tam)
-	, line0(original.line0)
-	, column0(original.column0)
 {
 	for (int i = 0; i < tam; ++i)
 	{
@@ -126,18 +127,18 @@ bool puzzle::check_solve() {
 
 void puzzle::compute_manhattan_dist() {
 	int i, j;
-	distance = 0;
+    totalDistance = 0;
 	for(i = 0; i < tam; i++){
 		for(j = 0;j < tam; j++){
 			manhattan_update(i, j);
-			distance += distances[i][j];
+            totalDistance += distances[i][j];
 		}
 	}
 }
 
 int puzzle::manhattan_dist() const
 {
-	return distance;
+    return totalDistance;
 }
 
 bool puzzle::isMoveValid(enum zero_movement move)
@@ -242,7 +243,7 @@ void puzzle::manhattan_update(int line, int column) {
 	else
 		distances[line][column] = abs(line-properLine(value)) + abs(column-properColumn(value));
 
-	distance += distances[line][column] - formerDistance;
+    totalDistance += distances[line][column] - formerDistance;
 }
 
 int puzzle::getTam()
