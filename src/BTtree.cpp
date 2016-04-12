@@ -1,4 +1,4 @@
-#include <BTtree.h>
+#include "../include/BTtree.h"
 
 BTtree::node::node(const puzzle &copy)
 : infos(copy)

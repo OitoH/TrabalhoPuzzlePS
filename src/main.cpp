@@ -1,6 +1,6 @@
 #include <iostream>
-#include <BTtree.h>
-#include <puzzle.h>
+#include "../include/BTtree.h"
+#include "../include/puzzle.h"
 
 using namespace std;
 

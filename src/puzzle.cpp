@@ -1,4 +1,4 @@
-#include <puzzle.h>
+#include "../include/puzzle.h"
 
 enum puzzle::zero_movement puzzle::oppositeMovement(enum puzzle::zero_movement dir)
 {
@@ -94,9 +94,9 @@ puzzle::puzzle(int tam)
 }
 
 puzzle::puzzle(const puzzle &original)
-	: table(tam)
-	, distances(tam)
-	, tam(original.tam)
+    : tam(original.tam)
+    , table(tam)
+    , distances(tam)
 	, line0(original.line0)
 	, column0(original.column0)
 {
