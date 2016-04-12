@@ -225,9 +225,9 @@ string puzzle::toString(){
 	for(i = 0; i < tam; ++i)
 	{
         stream << "{";
-		stream << table[i][0];
+        stream << (int)table[i][0];
 		for(j = 1; j < tam; ++j)
-			stream << "\t" << table[i][j];
+            stream << ",\t" << (int)table[i][j];
         stream << "}\n";
 	}
 

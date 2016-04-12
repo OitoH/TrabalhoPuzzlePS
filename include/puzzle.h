@@ -62,6 +62,6 @@ private:
 	int tam;
 	int line0, column0;
 	int distance;
-    vector< vector<uint_fast16_t> > table;
-    vector< vector<uint_fast16_t> > distances;
+    vector< vector<uint_fast8_t> > table;
+    vector< vector<uint_fast8_t> > distances;
 };

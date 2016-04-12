@@ -6,11 +6,11 @@ using namespace std;
 
 int main(){
 	int tam;
-
+/*
     cin >> tam;
 
     puzzle original(tam);
-
+*/
         /*
 	puzzle original { // Caso teste: não solucinável.
             {0, 3},
@@ -83,15 +83,15 @@ int main(){
             {10, 13, 4, 15}
         };
 */
-/*
-        puzzle original {
-            {, , , , ,},
-            {, , , , ,},
-            {, , , , ,},
-            {, , , , ,},
-            {, , , , ,}
-        };
-*/
+
+    puzzle original { //5 -> 23.5s
+        {23, 12, 0,	10,	18},
+        {7,	9,	13,	17,	4},
+        {3,	21,	24,	20,	8},
+        {11, 16, 1,	15,	19},
+        {6,	2,	5,	22,	14}
+    };
+
 	cout << "Quebra cabeça: \n" << original.toString();
 
 	if(!original.check_solve()){
