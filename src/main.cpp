@@ -7,9 +7,9 @@ using namespace std;
 int main(){
 	int tam;
 
-	//cin >> tam;
+    cin >> tam;
 
-	//puzzle original(tam);
+    puzzle original(tam);
 
         /*
 	puzzle original { // Caso teste: não solucinável.
@@ -40,13 +40,14 @@ int main(){
         */
         
         // SOLVABLE!
+    /*
         puzzle original {
             {11, 6, 0, 8},
             {15, 4, 12, 7},
             {5, 9, 3, 2},
             {1, 14, 10, 13}            
         };
-
+*/
         
         
         /* // UNSOLVABLE!
@@ -74,7 +75,23 @@ int main(){
             {1, 6, 5}
         };
         */
-
+/*
+        puzzle original { //4 -> 1.14s
+            {2, 9, 11, 12,},
+            {5, 14, 0, 1,},
+            {8, 6, 3, 7,},
+            {10, 13, 4, 15}
+        };
+*/
+/*
+        puzzle original {
+            {, , , , ,},
+            {, , , , ,},
+            {, , , , ,},
+            {, , , , ,},
+            {, , , , ,}
+        };
+*/
 	cout << "Quebra cabeça: \n" << original.toString();
 
 	if(!original.check_solve()){

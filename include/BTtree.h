@@ -13,20 +13,19 @@ public:
 
 	class node
 	{
-	public:
-		shared_ptr<node> father;
+    public:
 		puzzle infos;
 		enum puzzle::zero_movement movement;
 		int depth;
 
 		node(const puzzle &copy);
 
-		node(shared_ptr<node> lastNode, enum puzzle::zero_movement thisMovement);
+        node(node *lastNode, enum puzzle::zero_movement thisMovement);
 
 		class priorityCalculator
 		{
 		public:
-			bool operator() (shared_ptr<BTtree::node> lhs, shared_ptr<BTtree::node> rhs) const;
+            bool operator() (node *lhs, node *rhs) const;
 		};
 	};
 
@@ -34,6 +33,8 @@ public:
 
 	BTtree(puzzle &original);
 
+    ~BTtree();
+
 private:
-	shared_ptr<node> rootNode, currentNode;
+    node *rootNode, *currentNode;
 };
