@@ -34,6 +34,8 @@ public:
 
 	puzzle(const puzzle &original);
 
+    int getTam();
+
 	int properLine(int pieceNum);
 
 	int properColumn(int pieceNum);
@@ -51,6 +53,7 @@ public:
 	int inversion();
 
 	string toString();
+
 
 private:
 	void compute_manhattan_dist();

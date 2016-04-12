@@ -41,12 +41,12 @@ void BTtree::startDeathRide()
 		// Explora o nó de maior prioridade.
 		currentNode = unexploredNodes.top();
 		unexploredNodes.pop();
-        cout << "Next node\nDepth: " << currentNode->depth << "\n" << currentNode->infos.toString() << endl;
+        //cout << "Next node\nDepth: " << currentNode->depth << " Manhattan: " << currentNode->infos.manhattan_dist() << "\n" << currentNode->infos.toString() << endl;
 	}
 	cout << "Resultado:\n" << currentNode->infos.toString() << endl;
 }
 
 bool BTtree::node::priorityCalculator::operator() (shared_ptr<BTtree::node> lhs, shared_ptr<BTtree::node> rhs) const
 {
-    return (lhs->infos.manhattan_dist() + lhs->depth / 2) >= (rhs->infos.manhattan_dist() + rhs->depth / 2);
+    return (lhs->infos.manhattan_dist() + lhs->depth/lhs->infos.getTam()) > (rhs->infos.manhattan_dist() + rhs->depth/lhs->infos.getTam());
 }

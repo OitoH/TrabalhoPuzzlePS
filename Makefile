@@ -6,7 +6,7 @@ LIBS = -fopenmp
 #LIBS += -lm
 
 CL = $(wildcard src/*.cpp)    #cpp list
-HL = $(wildcard include/*.hpp)    #header list
+HL = $(wildcard include/*.h)    #header list
 OL = $(patsubst src/%.cpp, obj/%.o, $(CL) )  #object list
 
 all: $(OL); $(CC) $(CFLAGS) $(OL) $(LIBS) $(INCLUDE) -o main

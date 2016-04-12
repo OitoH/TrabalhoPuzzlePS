@@ -244,3 +244,8 @@ void puzzle::manhattan_update(int line, int column) {
 
 	distance += distances[line][column] - formerDistance;
 }
+
+int puzzle::getTam()
+{
+    return tam;
+}
