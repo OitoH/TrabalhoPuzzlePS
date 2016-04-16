@@ -1,10 +1,12 @@
 #include <iostream>
 #include "../include/BTtree.h"
 #include "../include/puzzle.h"
+#include <chrono>
 
 using namespace std;
 
 int main(){
+    auto beginTime = chrono::high_resolution_clock::now();
 	int tam;
 /*
     cin >> tam;
@@ -104,6 +106,10 @@ int main(){
 
 	BTtree solver(original);
 	solver.startDeathRide();
+
+    auto endTime = chrono::high_resolution_clock::now();
+    chrono::duration<double> responseTime = chrono::duration_cast<chrono::duration<double>>(endTime - beginTime);
+    cout << "Response time: " << responseTime.count()  << "seconds." << endl;
 
 	return 0;
 }

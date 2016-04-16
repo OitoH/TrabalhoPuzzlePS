@@ -1,4 +1,5 @@
 #include "../include/puzzle.h"
+#include <omp.h>
 
 enum puzzle::zero_movement puzzle::oppositeMovement(enum puzzle::zero_movement dir)
 {
@@ -100,6 +101,7 @@ puzzle::puzzle(const puzzle &original)
     , table(new uint_fast8_t*[tam])
     , distances(new uint_fast8_t*[tam])
 {
+#pragma omp parallel for
 	for (int i = 0; i < tam; ++i)
 	{
         table[i] = new uint_fast8_t[tam];

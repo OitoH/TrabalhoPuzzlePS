@@ -1,8 +1,8 @@
 CC = g++
-CFLAGS = -g -std=c++11 -g -Wall #-Og -Wall
+CFLAGS = -fopenmp -g -std=c++11 -g -Wall #-Og -Wall
 
 INCLUDE = -Iinclude/ -I/usr/include/
-LIBS = -fopenmp
+LIBS =
 #LIBS += -lm
 
 CL = $(wildcard src/*.cpp)    #cpp list
