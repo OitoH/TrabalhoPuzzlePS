@@ -109,7 +109,7 @@ int main(){
 
     auto endTime = chrono::high_resolution_clock::now();
     chrono::duration<double> responseTime = chrono::duration_cast<chrono::duration<double>>(endTime - beginTime);
-    cout << "Response time: " << responseTime.count()  << "seconds." << endl;
+    cout << "Tempo de resposta: " << responseTime.count()  << " segundos." << endl;
 
 	return 0;
 }

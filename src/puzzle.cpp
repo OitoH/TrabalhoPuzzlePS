@@ -1,5 +1,4 @@
 #include "../include/puzzle.h"
-#include <omp.h>
 
 enum puzzle::zero_movement puzzle::oppositeMovement(enum puzzle::zero_movement dir)
 {
@@ -26,27 +25,27 @@ puzzle::puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementLi
 {
     int j, i = 0;
 
-	for(auto& it: elementList)
-	{
+    for(auto& it: elementList)
+    {
 		if (it.size() != tam)
-			throw -1;
+            throw -1;
 
         table[i] = new uint_fast8_t[tam];
         distances[i] = new uint_fast8_t[tam];
 
-		j = 0;
-		for(auto piece: it)
-		{
+        j = 0;
+        for(auto piece: it)
+        {
 			if (piece == 0)
 			{
 				line0 = i;
 				column0 = j;
 			}
-			table[i][j] = piece;
-			++j;
-		}
-		++i;
-	}
+            table[i][j] = piece;
+            ++j;
+        }
+        ++i;
+    }
 	compute_manhattan_dist();
 }
 
@@ -101,12 +100,12 @@ puzzle::puzzle(const puzzle &original)
     , table(new uint_fast8_t*[tam])
     , distances(new uint_fast8_t*[tam])
 {
-#pragma omp parallel for
-	for (int i = 0; i < tam; ++i)
+    int i,j;
+    for (i = 0; i < tam; ++i)
 	{
         table[i] = new uint_fast8_t[tam];
         distances[i] = new uint_fast8_t[tam];
-		for (int j = 0; j < tam; ++j)
+        for (j = 0; j < tam; ++j)
 		{
 			table[i][j] = original.table[i][j];
 			distances[i][j] = original.distances[i][j];

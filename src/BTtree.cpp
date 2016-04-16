@@ -1,4 +1,5 @@
 #include "../include/BTtree.h"
+#include <algorithm>
 
 BTtree::node::node(const puzzle &copy)
 : infos(copy)
@@ -21,33 +22,41 @@ BTtree::BTtree(const puzzle &original)
 
 void BTtree::startDeathRide()
 {
-    priority_queue<node *, vector<node *>, node::priorityCalculator> unexploredNodes;
-	vector<enum puzzle::zero_movement> movements{
+    int i;
+    vector<node *> unexploredNodes;
+    enum puzzle::zero_movement movements[4] = {
 		puzzle::ZERO_UP,
 		puzzle::ZERO_DOWN,
 		puzzle::ZERO_LEFT,
 		puzzle::ZERO_RIGHT
 	};
+
     currentNode = new node(rootNode->infos);
 	while(currentNode->infos.manhattan_dist() != 0)
     {
 		// Realizar todos os movimentos possíveis no zero.
-		for (auto it: movements)
-			if (currentNode->movement != puzzle::oppositeMovement(it) && currentNode->infos.isMoveValid(it))
-                unexploredNodes.push(new node(currentNode, it));
+        for (i = 0; i < 4; i++)
+            if (currentNode->movement != puzzle::oppositeMovement(movements[i]) && currentNode->infos.isMoveValid(movements[i]))
+            {
+                unexploredNodes.push_back(new node(currentNode, movements[i]));
+                push_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
+            }
 
         delete currentNode;
+
 		// Explora o nó de maior prioridade.
-		currentNode = unexploredNodes.top();
-		unexploredNodes.pop();
+        currentNode = unexploredNodes.front();
+        pop_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
+        unexploredNodes.pop_back();
         //cout << "Next node\nDepth: " << currentNode->depth << " Manhattan: " << currentNode->infos.manhattan_dist() << "\n" << currentNode->infos.toString() << endl;
 	}
 	cout << "Resultado:\n" << currentNode->infos.toString() << endl;
+
+    // Limpando memória alocada.
     delete currentNode;
-    while(!unexploredNodes.empty())
+    for (i = unexploredNodes.size() - 1; i > -1; i--)
     {
-        currentNode = unexploredNodes.top();
-        unexploredNodes.pop();
+        currentNode = unexploredNodes[i];
         delete currentNode;
     }
 }
