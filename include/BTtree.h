@@ -35,5 +35,5 @@ public:
     ~BTtree();
 
 private:
-    node *rootNode, *currentNode;
+    node *rootNode;
 };
