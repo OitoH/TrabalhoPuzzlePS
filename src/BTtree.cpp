@@ -23,7 +23,9 @@ BTtree::BTtree(const puzzle &original)
 
 void BTtree::startDeathRide()
 {
-    int i, threadsNum, myID;
+    unsigned int threadsNum, myID;
+    int i;
+    
     const enum puzzle::zero_movement movements[4] = {
 		puzzle::ZERO_UP,
 		puzzle::ZERO_DOWN,

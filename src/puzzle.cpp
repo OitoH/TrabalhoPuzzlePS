@@ -27,7 +27,7 @@ puzzle::puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementLi
 
     for(auto& it: elementList)
     {
-		if (it.size() != tam)
+		if (it.size() != static_cast<unsigned int>(tam))
             throw -1;
 
         table[i] = new uint_fast8_t[tam];

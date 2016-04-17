@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -fopenmp -g -std=c++11 -g -Wall #-Og -Wall
+CFLAGS = -fopenmp -g -std=c++11 -Wall #-Og -Wall
 
 INCLUDE = -Iinclude/ -I/usr/include/
 LIBS =
