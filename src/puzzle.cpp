@@ -49,6 +49,30 @@ puzzle::puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementLi
 	compute_manhattan_dist();
 }
 
+puzzle::puzzle(const vector<vector<uint_fast8_t>>& elements)
+    : tam(elements.size())
+    , table(new uint_fast8_t*[tam])
+    , distances(new uint_fast8_t*[tam])
+{
+
+    for(unsigned int i = 0; i < elements.size(); ++i)
+    {
+        table[i] = new uint_fast8_t[tam];
+        distances[i] = new uint_fast8_t[tam];
+
+        for(unsigned int j = 0; j < elements.size(); ++j)
+        {
+			if (elements[i][j] == 0)
+			{
+				line0 = i;
+				column0 = j;
+			}
+            table[i][j] = elements[i][j];
+        }
+    }
+	compute_manhattan_dist();
+}
+
 puzzle::puzzle(int tam)
     : table(new uint_fast8_t*[tam])
     , distances(new uint_fast8_t*[tam])

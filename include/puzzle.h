@@ -30,6 +30,8 @@ public:
 
     puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementList);
 
+	puzzle(const vector<vector<uint_fast8_t>>& elements);
+
 	puzzle(int tam);
 
 	puzzle(const puzzle &original);
