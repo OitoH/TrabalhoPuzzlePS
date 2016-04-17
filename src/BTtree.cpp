@@ -50,7 +50,7 @@ void BTtree::startDeathRide()
         unexploredNodes.pop_back();
         //cout << "Next node\nDepth: " << currentNode->depth << " Manhattan: " << currentNode->infos.manhattan_dist() << "\n" << currentNode->infos.toString() << endl;
 	}
-	cout << "Resultado:\n" << currentNode->infos.toString() << endl;
+    cout << "Resultado:\t" << "Profundidade: " << currentNode->depth << endl << currentNode->infos.toString() << endl;
 
     // Limpando memória alocada.
     delete currentNode;
