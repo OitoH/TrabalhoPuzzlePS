@@ -72,6 +72,8 @@ void BTtree::startDeathRide()
             globalNodes.pop_front();
             //cout << "Next node\nDepth: " << currentNode->depth << " Manhattan: " << currentNode->infos.manhattan_dist() << "\n" << currentNode->infos.toString() << endl;
         } while(globalNodes.size() < threadsNum && (lastGeneratedNodes != 1 || generatedNodes != 1) );
+
+        delete currentNode;
     }
 
     // DEBUG
@@ -98,7 +100,6 @@ void BTtree::startDeathRide()
             currentNode = unexploredNodes.front();
             pop_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
 
-            //delete unexploredNodes.back();
             unexploredNodes.pop_back();
             //cout << "Next node\nDepth: " << currentNode->depth << " Manhattan: " << currentNode->infos.manhattan_dist() << "\n" << currentNode->infos.toString() << endl;
 
@@ -111,11 +112,17 @@ void BTtree::startDeathRide()
                     if(notSolved)
                     {
                         notSolved = false;
+
+                        if(solution != nullptr)
+                            delete solution;
+
                         solution = currentNode;
                     }
                     else if(solution->depth > currentNode->depth)
                     {
-                        delete solution;
+                        if(solution != nullptr)
+                            delete solution;
+
                         solution = currentNode;
                     }
                     else
@@ -142,7 +149,7 @@ void BTtree::startDeathRide()
         }
 
         // DEBUG
-        // Limpa memória - Corrigir segfault.
+        // Limpa memória
         while(!unexploredNodes.empty())
         {
             delete unexploredNodes.back();
