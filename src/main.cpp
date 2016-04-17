@@ -85,7 +85,7 @@ int main(){
             {10, 13, 4, 15}
         };
 */
-
+/*
     puzzle original { //5 -> 23.5s
         {23, 12, 0,	10,	18},
         {7,	9,	13,	17,	4},
@@ -93,6 +93,11 @@ int main(){
         {11, 16, 1,	15,	19},
         {6,	2,	5,	22,	14}
     };
+ */
+    puzzle original {
+            {0, 2},
+            {1,	3}
+        };
 
 	cout << "Quebra cabeça: \n" << original.toString();
 

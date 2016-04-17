@@ -47,22 +47,31 @@ void BTtree::startDeathRide()
     // Uma thread qualquer gera os nós iniciais para todas as threads.
     #pragma omp single
     {
+        size_t lastGeneratedNodes, generatedNodes = 0;
         currentNode = new node(rootNode->infos);
 
-        // Enquanto não existir ao menos 1 nó para cada thread.
-        while(globalNodes.size() < threadsNum)
+        // Enquanto não existir ao menos 1 nó para cada thread ou não for possível nós suficientes para todas.
+        do
         {
+            lastGeneratedNodes = generatedNodes;
+            generatedNodes = 0;
+
             // Realizar todos os movimentos possíveis no zero.
             for (i = 0; i < 4; i++)
+            {
                 if (currentNode->movement != puzzle::oppositeMovement(movements[i]) && currentNode->infos.isMoveValid(movements[i]))
+                {
                     globalNodes.push_back(new node(currentNode, movements[i]));
+                    ++generatedNodes;
+                }
+            }
 
             delete currentNode;
 
             currentNode = globalNodes.front();
             globalNodes.pop_front();
             //cout << "Next node\nDepth: " << currentNode->depth << " Manhattan: " << currentNode->infos.manhattan_dist() << "\n" << currentNode->infos.toString() << endl;
-        }
+        } while(globalNodes.size() < threadsNum && (lastGeneratedNodes != 1 || generatedNodes != 1) );
     }
 
     // DEBUG
@@ -73,63 +82,72 @@ void BTtree::startDeathRide()
     for(i = globalNodes.size() - 1 - myID; i > -1; i -= threadsNum)
         unexploredNodes.push_back(globalNodes[i]);
 
-    make_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
-    #pragma omp barrier // Garante que todas as threads já criaram suas listas.
+    #pragma omp barrier // Garantir que todas as threads já formaram suas listas.
+    #pragma omp single
+    globalNodes.clear();
 
-
-    // Inicia exploração.
-    // Enquanto uma solução definitiva não foi encontrada.
-    while(notSolved)
+    if(!unexploredNodes.empty())
     {
-        // Explora o nó de maior prioridade.
-        currentNode = unexploredNodes.front();
-        pop_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
+        make_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
 
-        //delete unexploredNodes.back();
-        unexploredNodes.pop_back();
-        //cout << "Next node\nDepth: " << currentNode->depth << " Manhattan: " << currentNode->infos.manhattan_dist() << "\n" << currentNode->infos.toString() << endl;
+        // Inicia exploração.
+        // Enquanto uma solução definitiva não foi encontrada.
+        while(notSolved)
+        {
+            // Explora o nó de maior prioridade.
+            currentNode = unexploredNodes.front();
+            pop_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
 
-        // Se a thread encontrou uma solução.
-        if (currentNode->infos.manhattan_dist() == 0)
-        {
-            // Caso mais de uma thread encontre uma solução em tempo similar a melhor solução será escolhida.
-            #pragma omp critical
+            //delete unexploredNodes.back();
+            unexploredNodes.pop_back();
+            //cout << "Next node\nDepth: " << currentNode->depth << " Manhattan: " << currentNode->infos.manhattan_dist() << "\n" << currentNode->infos.toString() << endl;
+
+            // Se a thread encontrou uma solução.
+            if (currentNode->infos.manhattan_dist() == 0)
             {
-                if(notSolved)
+                // Caso mais de uma thread encontre uma solução em tempo similar a melhor solução será escolhida.
+                #pragma omp critical
                 {
-                    notSolved = false;
-                    solution = currentNode;
-                }
-                else if(solution->depth > currentNode->depth)
-                {
-                    delete solution;
-                    solution = currentNode;
-                }
-                // DEBUG
-                cout << "I found it ! Thread: " << myID << endl << currentNode->infos.toString() << endl;
-            }
-        }
-        else
-        {
-            // Realizar todos os movimentos possíveis no zero.
-            for (i = 0; i < 4; i++)
-            {
-                if (currentNode->movement != puzzle::oppositeMovement(movements[i]) && currentNode->infos.isMoveValid(movements[i]))
-                {
-                    unexploredNodes.push_back(new node(currentNode, movements[i]));
-                    push_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
+                    if(notSolved)
+                    {
+                        notSolved = false;
+                        solution = currentNode;
+                    }
+                    else if(solution->depth > currentNode->depth)
+                    {
+                        delete solution;
+                        solution = currentNode;
+                    }
+                    else
+                    {
+                        delete currentNode;
+                    }
+                    // DEBUG
+                    cout << "I found it ! Thread: " << myID << endl << currentNode->infos.toString() << endl;
                 }
             }
-            delete currentNode;
+            else
+            {
+                // Realizar todos os movimentos possíveis no zero.
+                for (i = 0; i < 4; i++)
+                {
+                    if (currentNode->movement != puzzle::oppositeMovement(movements[i]) && currentNode->infos.isMoveValid(movements[i]))
+                    {
+                        unexploredNodes.push_back(new node(currentNode, movements[i]));
+                        push_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
+                    }
+                }
+                delete currentNode;
+            }
         }
-    }
 
-    // DEBUG
-    // Limpa memória - Corrigir segfault.
-    while(!unexploredNodes.empty())
-    {
-        delete unexploredNodes.back();
-        unexploredNodes.pop_back();
+        // DEBUG
+        // Limpa memória - Corrigir segfault.
+        while(!unexploredNodes.empty())
+        {
+            delete unexploredNodes.back();
+            unexploredNodes.pop_back();
+        }
     }
 
     #pragma omp barrier

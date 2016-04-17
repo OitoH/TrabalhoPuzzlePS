@@ -13,7 +13,7 @@ public:
 	class node
 	{
     public:
-		puzzle infos;
+        puzzle infos;
 		enum puzzle::zero_movement movement;
 		int depth;
 

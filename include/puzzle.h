@@ -54,8 +54,7 @@ public:
 
 	int inversion();
 
-	string toString();
-
+    string toString();
 
 private:
 	void compute_manhattan_dist();
