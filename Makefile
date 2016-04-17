@@ -18,4 +18,4 @@ obj/%.o: src/%.cpp obj; $(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 run: ; ./main
 
-clean: ; rm $(wildcard obj/*.o) main
+clean: ; rm -f $(wildcard obj/*.o) main

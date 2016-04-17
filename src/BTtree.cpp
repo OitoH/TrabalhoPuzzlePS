@@ -25,7 +25,7 @@ void BTtree::startDeathRide()
 {
     unsigned int threadsNum, myID;
     int i;
-    
+
     const enum puzzle::zero_movement movements[4] = {
 		puzzle::ZERO_UP,
 		puzzle::ZERO_DOWN,
@@ -66,7 +66,7 @@ void BTtree::startDeathRide()
     }
 
     // DEBUG
-#pragma omp single nowait
+    #pragma omp single nowait
     cout << "Not solved: " << notSolved << "\nNós gerados: " << globalNodes.size() << "\nThreads: " << threadsNum << endl;
 
     // Cada thread preenche a sua lista de prioridade.
@@ -84,6 +84,8 @@ void BTtree::startDeathRide()
         // Explora o nó de maior prioridade.
         currentNode = unexploredNodes.front();
         pop_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
+
+        //delete unexploredNodes.back();
         unexploredNodes.pop_back();
         //cout << "Next node\nDepth: " << currentNode->depth << " Manhattan: " << currentNode->infos.manhattan_dist() << "\n" << currentNode->infos.toString() << endl;
 
@@ -124,11 +126,13 @@ void BTtree::startDeathRide()
 
     // DEBUG
     // Limpa memória - Corrigir segfault.
-    /*
-    for(i = unexploredNodes.size() - 1; i > - 1; i++)
+    while(!unexploredNodes.empty())
     {
-        delete unexploredNodes[i];
-    }*/
+        delete unexploredNodes.back();
+        unexploredNodes.pop_back();
+    }
+
+    #pragma omp barrier
 }
     cout << "Resultado:\tProfundidade:" << solution->depth << "\n" << solution->infos.toString() << endl;
 
