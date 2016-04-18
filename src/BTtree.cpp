@@ -43,7 +43,6 @@ void BTtree::startDeathRide()
     threadsNum = omp_get_num_threads();
     myID = omp_get_thread_num();
 
-    // TODO: Paralelizar criação dos nós iniciais.
     // Uma thread qualquer gera os nós iniciais para todas as threads.
     #pragma omp single
     {
@@ -70,15 +69,10 @@ void BTtree::startDeathRide()
 
             currentNode = globalNodes.front();
             globalNodes.pop_front();
-            //cout << "Next node\nDepth: " << currentNode->depth << " Manhattan: " << currentNode->infos.manhattan_dist() << "\n" << currentNode->infos.toString() << endl;
-        } while(globalNodes.size() < threadsNum && (lastGeneratedNodes != 1 || generatedNodes != 1) );
+        } while(globalNodes.size() < threadsNum && !(lastGeneratedNodes != 1 && generatedNodes != 1) );
 
         delete currentNode;
     }
-
-    // DEBUG
-    #pragma omp single nowait
-    cout << "Not solved: " << notSolved << "\nNós gerados: " << globalNodes.size() << "\nThreads: " << threadsNum << endl;
 
     // Cada thread preenche a sua lista de prioridade.
     for(i = globalNodes.size() - 1 - myID; i > -1; i -= threadsNum)
@@ -101,7 +95,6 @@ void BTtree::startDeathRide()
             pop_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
 
             unexploredNodes.pop_back();
-            //cout << "Next node\nDepth: " << currentNode->depth << " Manhattan: " << currentNode->infos.manhattan_dist() << "\n" << currentNode->infos.toString() << endl;
 
             // Se a thread encontrou uma solução.
             if (currentNode->infos.manhattan_dist() == 0)
@@ -112,25 +105,16 @@ void BTtree::startDeathRide()
                     if(notSolved)
                     {
                         notSolved = false;
-
-                        if(solution != nullptr)
-                            delete solution;
-
                         solution = currentNode;
                     }
                     else if(solution->depth > currentNode->depth)
                     {
-                        if(solution != nullptr)
-                            delete solution;
-
                         solution = currentNode;
                     }
                     else
                     {
                         delete currentNode;
                     }
-                    // DEBUG
-                    cout << "I found it ! Thread: " << myID << endl << currentNode->infos.toString() << endl;
                 }
             }
             else
@@ -148,8 +132,7 @@ void BTtree::startDeathRide()
             }
         }
 
-        // DEBUG
-        // Limpa memória
+        // Liberando memória.
         while(!unexploredNodes.empty())
         {
             delete unexploredNodes.back();
@@ -161,7 +144,7 @@ void BTtree::startDeathRide()
 }
     cout << "Resultado:\tProfundidade:" << solution->depth << "\n" << solution->infos.toString() << endl;
 
-    // Limpando memória alocada.
+    // Liberando memória alocada.
     delete solution;
 }
 

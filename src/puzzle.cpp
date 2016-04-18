@@ -250,8 +250,7 @@ int puzzle::inversion(){
 			if (successor != 0 && preceding > successor)
 				inv++;
 		}
-	}
-	std::cout << "inversions: " << inv << "\n";
+    }
 	return inv;
 }
 
@@ -260,12 +259,11 @@ string puzzle::toString(){
 	int i, j;
 
 	for(i = 0; i < tam; ++i)
-	{
-        stream << "{";
+    {
         stream << (int)table[i][0];
 		for(j = 1; j < tam; ++j)
             stream << ",\t" << (int)table[i][j];
-        stream << "}\n";
+        stream << "\n";
 	}
 
 	return stream.str();

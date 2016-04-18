@@ -6,10 +6,10 @@
 using namespace std;
 
 int main(){
-    auto beginTime = chrono::high_resolution_clock::now();
 	unsigned int tam;
     char isRandom;
     puzzle *original = nullptr;
+    chrono::time_point<chrono::high_resolution_clock> beginTime, endTime;
 
     cout << "Voce deseja criar um puzzle aleatorio? ('s' ou 'n')" << endl;
 
@@ -36,6 +36,7 @@ int main(){
 
     if(isRandom == 's')
     {
+        beginTime = chrono::high_resolution_clock::now();
         original = new puzzle(tam);
     }
     else
@@ -62,6 +63,7 @@ int main(){
             }
         }
 
+        beginTime = chrono::high_resolution_clock::now();
         original = new puzzle(elementos);
     }
 
@@ -77,14 +79,14 @@ int main(){
 		cout << "Nao ha solucao para esse caso, chupa essa manga!" << endl;
 		return 0;
 	} else {
-            cout << "Solvable!\n";
+            cout << "Solucionável!\n";
     }
 
 
 	BTtree solver(*original);
 	solver.startDeathRide();
 
-    auto endTime = chrono::high_resolution_clock::now();
+    endTime = chrono::high_resolution_clock::now();
     chrono::duration<double> responseTime = chrono::duration_cast<chrono::duration<double>>(endTime - beginTime);
     cout << "Tempo de resposta: " << responseTime.count()  << " segundos." << endl;
 
