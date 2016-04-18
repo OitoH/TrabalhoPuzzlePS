@@ -38,110 +38,115 @@ void BTtree::startDeathRide()
     vector<node *> unexploredNodes;
     node *currentNode, *solution = nullptr;
 
-#pragma omp parallel private(i, threadsNum, myID, unexploredNodes, currentNode), shared(globalNodes, notSolved, solution)
-{
-    threadsNum = omp_get_num_threads();
-    myID = omp_get_thread_num();
-
-    // Uma thread qualquer gera os nós iniciais para todas as threads.
-    #pragma omp single
+    if (rootNode->infos.getTam() != 1)
     {
-        size_t lastGeneratedNodes, generatedNodes = 0;
-        currentNode = new node(rootNode->infos);
-
-        // Enquanto não existir ao menos 1 nó para cada thread ou não for possível nós suficientes para todas.
-        do
+        #pragma omp parallel private(i, threadsNum, myID, unexploredNodes, currentNode), shared(globalNodes, notSolved, solution)
         {
-            lastGeneratedNodes = generatedNodes;
-            generatedNodes = 0;
+            threadsNum = omp_get_num_threads();
+            myID = omp_get_thread_num();
 
-            // Realizar todos os movimentos possíveis no zero.
-            for (i = 0; i < 4; i++)
+            // Uma thread qualquer gera os nós iniciais para todas as threads.
+            #pragma omp single
             {
-                if (currentNode->movement != puzzle::oppositeMovement(movements[i]) && currentNode->infos.isMoveValid(movements[i]))
+                size_t lastGeneratedNodes, generatedNodes = 0;
+                currentNode = new node(rootNode->infos);
+
+                // Enquanto não existir ao menos 1 nó para cada thread ou não for possível nós suficientes para todas.
+                do
                 {
-                    globalNodes.push_back(new node(currentNode, movements[i]));
-                    ++generatedNodes;
-                }
+                    lastGeneratedNodes = generatedNodes;
+                    generatedNodes = 0;
+
+                    // Realizar todos os movimentos possíveis no zero.
+                    for (i = 0; i < 4; i++)
+                    {
+                        if (currentNode->movement != puzzle::oppositeMovement(movements[i]) && currentNode->infos.isMoveValid(movements[i]))
+                        {
+                            globalNodes.push_back(new node(currentNode, movements[i]));
+                            ++generatedNodes;
+                        }
+                    }
+
+                    delete currentNode;
+
+                    currentNode = globalNodes.front();
+                    globalNodes.pop_front();
+                } while(globalNodes.size() < threadsNum && !(lastGeneratedNodes != 1 && generatedNodes != 1) );
+
+                delete currentNode;
             }
 
-            delete currentNode;
+            // Cada thread preenche a sua lista de prioridade.
+            for(i = globalNodes.size() - 1 - myID; i > -1; i -= threadsNum)
+                unexploredNodes.push_back(globalNodes[i]);
 
-            currentNode = globalNodes.front();
-            globalNodes.pop_front();
-        } while(globalNodes.size() < threadsNum && !(lastGeneratedNodes != 1 && generatedNodes != 1) );
+            #pragma omp barrier // Garantir que todas as threads já formaram suas listas.
+            #pragma omp single
+            globalNodes.clear();
 
-        delete currentNode;
-    }
-
-    // Cada thread preenche a sua lista de prioridade.
-    for(i = globalNodes.size() - 1 - myID; i > -1; i -= threadsNum)
-        unexploredNodes.push_back(globalNodes[i]);
-
-    #pragma omp barrier // Garantir que todas as threads já formaram suas listas.
-    #pragma omp single
-    globalNodes.clear();
-
-    if(!unexploredNodes.empty())
-    {
-        make_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
-
-        // Inicia exploração.
-        // Enquanto uma solução definitiva não foi encontrada.
-        while(notSolved)
-        {
-            // Explora o nó de maior prioridade.
-            currentNode = unexploredNodes.front();
-            pop_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
-
-            unexploredNodes.pop_back();
-
-            // Se a thread encontrou uma solução.
-            if (currentNode->infos.manhattan_dist() == 0)
+            if(!unexploredNodes.empty())
             {
-                // Caso mais de uma thread encontre uma solução em tempo similar a melhor solução será escolhida.
-                #pragma omp critical
+                make_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
+
+                // Inicia exploração.
+                // Enquanto uma solução definitiva não foi encontrada.
+                while(notSolved)
                 {
-                    if(notSolved)
+                    // Explora o nó de maior prioridade.
+                    currentNode = unexploredNodes.front();
+                    pop_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
+
+                    unexploredNodes.pop_back();
+
+                    // Se a thread encontrou uma solução.
+                    if (currentNode->infos.manhattan_dist() == 0)
                     {
-                        notSolved = false;
-                        solution = currentNode;
-                    }
-                    else if(solution->depth > currentNode->depth)
-                    {
-                        solution = currentNode;
+                        // Caso mais de uma thread encontre uma solução em tempo similar a melhor solução será escolhida.
+                        #pragma omp critical
+                        {
+                            if(notSolved)
+                            {
+                                notSolved = false;
+                                solution = currentNode;
+                            }
+                            else if(solution->depth > currentNode->depth)
+                            {
+                                solution = currentNode;
+                            }
+                            else
+                            {
+                                delete currentNode;
+                            }
+                        }
                     }
                     else
                     {
+                        // Realizar todos os movimentos possíveis no zero.
+                        for (i = 0; i < 4; i++)
+                        {
+                            if (currentNode->movement != puzzle::oppositeMovement(movements[i]) && currentNode->infos.isMoveValid(movements[i]))
+                            {
+                                unexploredNodes.push_back(new node(currentNode, movements[i]));
+                                push_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
+                            }
+                        }
                         delete currentNode;
                     }
                 }
-            }
-            else
-            {
-                // Realizar todos os movimentos possíveis no zero.
-                for (i = 0; i < 4; i++)
-                {
-                    if (currentNode->movement != puzzle::oppositeMovement(movements[i]) && currentNode->infos.isMoveValid(movements[i]))
-                    {
-                        unexploredNodes.push_back(new node(currentNode, movements[i]));
-                        push_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
-                    }
-                }
-                delete currentNode;
-            }
-        }
 
-        // Liberando memória.
-        while(!unexploredNodes.empty())
-        {
-            delete unexploredNodes.back();
-            unexploredNodes.pop_back();
+                // Liberando memória.
+                while(!unexploredNodes.empty())
+                {
+                    delete unexploredNodes.back();
+                    unexploredNodes.pop_back();
+                }
+            }
+
+            #pragma omp barrier
         }
     }
-
-    #pragma omp barrier
-}
+    else
+        solution = new node(rootNode->infos);
     cout << "Resultado:\tProfundidade:" << solution->depth << "\n" << solution->infos.toString() << endl;
 
     // Liberando memória alocada.
