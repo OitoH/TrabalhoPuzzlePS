@@ -17,6 +17,8 @@ class puzzle {
 
 public:
 
+    typedef uint_fast8_t element_type;
+
 	enum zero_movement
 	{
 		ZERO_UP,
@@ -26,11 +28,25 @@ public:
 		ZERO_NONE
 	};
 
+    class Key {
+    private:
+        const bool isTemporary;
+    public:
+        size_t blockSize;
+        puzzle::element_type *memBlock;
+
+        Key(int puzzleTam, puzzle::element_type *keyBlock, bool temporary = false);
+
+        ~Key();
+
+        bool operator<(const Key &rhs) const;
+    };
+
 	static enum zero_movement oppositeMovement(enum zero_movement dir);
 
-    puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementList);
+    puzzle(const initializer_list<initializer_list<element_type>>& elementList);
 
-	puzzle(const vector<vector<uint_fast8_t>>& elements);
+    puzzle(const vector<vector<element_type>>& elements);
 
 	puzzle(int tam);
 
@@ -39,6 +55,8 @@ public:
     ~puzzle();
 
     int getTam();
+
+    Key getKey(bool temporary = false);
 
 	int properLine(int pieceNum);
 
@@ -65,6 +83,7 @@ private:
 	int tam;
 	int line0, column0;
     int totalDistance;
-    uint_fast8_t **table;
-    uint_fast8_t **distances;
+    element_type **table;
+    element_type *storage;
+    element_type **distances;
 };

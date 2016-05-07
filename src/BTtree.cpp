@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <deque>
 #include <omp.h>
+#include <set>
+#include <cstring>
 
 BTtree::node::node(const puzzle &copy)
 : infos(copy)
@@ -34,55 +36,59 @@ void BTtree::startDeathRide()
 	};
 
     bool notSolved = true;
+    set<puzzle::Key> exploredNodes;
     deque<node *> globalNodes;
     vector<node *> unexploredNodes;
     node *currentNode, *solution = nullptr;
 
-    if (rootNode->infos.getTam() != 1)
+    #pragma omp parallel private(i, threadsNum, myID, unexploredNodes, exploredNodes, currentNode), shared(globalNodes, notSolved, solution)
     {
-        #pragma omp parallel private(i, threadsNum, myID, unexploredNodes, currentNode), shared(globalNodes, notSolved, solution)
+        threadsNum = omp_get_num_threads();
+        myID = omp_get_thread_num();
+
+        // Uma thread qualquer gera os nós iniciais para todas as threads.
+        #pragma omp single
         {
-            threadsNum = omp_get_num_threads();
-            myID = omp_get_thread_num();
-
-            // Uma thread qualquer gera os nós iniciais para todas as threads.
-            #pragma omp single
+            globalNodes.push_back(new node(rootNode->infos));
+            // Enquanto não existir ao menos 1 nó para cada thread ou não for possível nós suficientes para todas.
+            do
             {
-                size_t lastGeneratedNodes, generatedNodes = 0;
-                currentNode = new node(rootNode->infos);
+                currentNode = globalNodes.front();
+                globalNodes.pop_front();
 
-                // Enquanto não existir ao menos 1 nó para cada thread ou não for possível nós suficientes para todas.
-                do
+                if(currentNode->infos.manhattan_dist() == 0)
                 {
-                    lastGeneratedNodes = generatedNodes;
-                    generatedNodes = 0;
-
-                    // Realizar todos os movimentos possíveis no zero.
+                    notSolved = false;
+                    solution = currentNode;
+                }
+                else
+                { // Realizar todos os movimentos possíveis no zero.
                     for (i = 0; i < 4; i++)
                     {
                         if (currentNode->movement != puzzle::oppositeMovement(movements[i]) && currentNode->infos.isMoveValid(movements[i]))
                         {
                             globalNodes.push_back(new node(currentNode, movements[i]));
-                            ++generatedNodes;
                         }
                     }
-
                     delete currentNode;
+                }
+            } while(notSolved && globalNodes.size() < threadsNum);
+        }
 
-                    currentNode = globalNodes.front();
-                    globalNodes.pop_front();
-                } while(globalNodes.size() < threadsNum && !(lastGeneratedNodes != 1 && generatedNodes != 1) );
-
-                delete currentNode;
-            }
-
+        if (notSolved)
+        {
             // Cada thread preenche a sua lista de prioridade.
-            for(i = globalNodes.size() - 1 - myID; i > -1; i -= threadsNum)
-                unexploredNodes.push_back(globalNodes[i]);
+            for(i = globalNodes.size() - 1; i > -1; --i)
+            {
+                if(i % threadsNum == myID)
+                    unexploredNodes.push_back(globalNodes[i]);
+                else
+                    exploredNodes.insert(globalNodes[i]->infos.getKey());
+            }
 
             #pragma omp barrier // Garantir que todas as threads já formaram suas listas.
             #pragma omp single
-            globalNodes.clear();
+                globalNodes.clear();
 
             if(!unexploredNodes.empty())
             {
@@ -141,12 +147,10 @@ void BTtree::startDeathRide()
                     unexploredNodes.pop_back();
                 }
             }
-
-            #pragma omp barrier
         }
+        #pragma omp barrier
     }
-    else
-        solution = new node(rootNode->infos);
+
     cout << "Resultado:\tProfundidade:" << solution->depth << "\n" << solution->infos.toString() << endl;
 
     // Liberando memória alocada.
