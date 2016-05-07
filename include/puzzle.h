@@ -56,7 +56,7 @@ public:
 
     int getTam();
 
-    Key getKey(bool temporary = false);
+    Key* getKey(bool temporary = false);
 
 	int properLine(int pieceNum);
 

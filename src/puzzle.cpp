@@ -291,9 +291,9 @@ int puzzle::getTam()
     return tam;
 }
 
-puzzle::Key puzzle::getKey(bool temporary)
+puzzle::Key *puzzle::getKey(bool temporary)
 {
-    return puzzle::Key(this->tam, this->storage, temporary);
+    return new puzzle::Key(this->tam, this->storage, temporary);
 }
 
 puzzle::Key::Key(int puzzleTam, puzzle::element_type *keyBlock, bool temporary)

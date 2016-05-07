@@ -36,7 +36,7 @@ void BTtree::startDeathRide()
 	};
 
     bool notSolved = true;
-    set<puzzle::Key> exploredNodes;
+    set<puzzle::Key*> exploredNodes;
     deque<node *> globalNodes;
     vector<node *> unexploredNodes;
     node *currentNode, *solution = nullptr;
@@ -145,6 +145,11 @@ void BTtree::startDeathRide()
                 {
                     delete unexploredNodes.back();
                     unexploredNodes.pop_back();
+                }
+                while(!exploredNodes.empty())
+                {
+                    delete exploredNodes.back();
+                    exploredNodes.pop_back();
                 }
             }
         }
