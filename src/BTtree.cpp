@@ -3,6 +3,7 @@
 #include <deque>
 #include <omp.h>
 #include <set>
+#include <map>
 #include <cstring>
 
 BTtree::node::node(const puzzle &copy)
@@ -35,13 +36,19 @@ void BTtree::startDeathRide()
 		puzzle::ZERO_RIGHT
 	};
 
-    bool notSolved = true;
-    set<puzzle::Key*> exploredNodes;
-    deque<node *> globalNodes;
-    vector<node *> unexploredNodes;
-    node *currentNode, *solution = nullptr;
+    class compareKeyAsPointer {
+    public:
+        bool operator()(puzzle::Key* a, puzzle::Key* b) {return a->operator <(*b);}
+    };
 
-    #pragma omp parallel private(i, threadsNum, myID, unexploredNodes, exploredNodes, currentNode), shared(globalNodes, notSolved, solution)
+    bool notSolved = true;
+    set<puzzle::Key*, compareKeyAsPointer> exploredNodes;
+    deque<node *> globalNodes;
+    set<node *, node::priorityCalculator> unexploredNodes;
+    set<node *, node::priorityCalculator>::iterator pop_front;
+    node *newNode, *currentNode, *solution = nullptr;
+
+    #pragma omp parallel private(i, threadsNum, myID, unexploredNodes, exploredNodes, newNode, currentNode), shared(globalNodes, notSolved, solution)
     {
         threadsNum = omp_get_num_threads();
         myID = omp_get_thread_num();
@@ -81,7 +88,7 @@ void BTtree::startDeathRide()
             for(i = globalNodes.size() - 1; i > -1; --i)
             {
                 if(i % threadsNum == myID)
-                    unexploredNodes.push_back(globalNodes[i]);
+                    unexploredNodes.insert(globalNodes[i]);
                 else
                     exploredNodes.insert(globalNodes[i]->infos.getKey());
             }
@@ -92,17 +99,14 @@ void BTtree::startDeathRide()
 
             if(!unexploredNodes.empty())
             {
-                make_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
-
                 // Inicia exploração.
                 // Enquanto uma solução definitiva não foi encontrada.
                 while(notSolved)
                 {
                     // Explora o nó de maior prioridade.
-                    currentNode = unexploredNodes.front();
-                    pop_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
-
-                    unexploredNodes.pop_back();
+                    pop_front = unexploredNodes.begin();
+                    currentNode = *pop_front;
+                    unexploredNodes.erase(currentNode);
 
                     // Se a thread encontrou uma solução.
                     if (currentNode->infos.manhattan_dist() == 0)
@@ -132,25 +136,25 @@ void BTtree::startDeathRide()
                         {
                             if (currentNode->movement != puzzle::oppositeMovement(movements[i]) && currentNode->infos.isMoveValid(movements[i]))
                             {
-                                unexploredNodes.push_back(new node(currentNode, movements[i]));
-                                push_heap(unexploredNodes.begin(), unexploredNodes.end(), node::priorityCalculator());
+                                newNode = new node(currentNode, movements[i]);
+                                if (exploredNodes.find(newNode->infos.getKey(true)) != exploredNodes.end()
+                                   || unexploredNodes.insert(newNode).second == false)
+                                    delete newNode;
                             }
                         }
+                        exploredNodes.insert(currentNode->infos.getKey());
                         delete currentNode;
                     }
                 }
 
                 // Liberando memória.
-                while(!unexploredNodes.empty())
-                {
-                    delete unexploredNodes.back();
-                    unexploredNodes.pop_back();
-                }
-                while(!exploredNodes.empty())
-                {
-                    delete exploredNodes.back();
-                    exploredNodes.pop_back();
-                }
+                for(auto it = unexploredNodes.begin(); it != unexploredNodes.end(); ++it)
+                    delete *it;
+                unexploredNodes.clear();
+
+                for(auto it = exploredNodes.begin(); it != exploredNodes.end(); ++it)
+                    delete *it;
+                exploredNodes.clear();
             }
         }
         #pragma omp barrier
@@ -164,7 +168,12 @@ void BTtree::startDeathRide()
 
 bool BTtree::node::priorityCalculator::operator() (node *lhs, node *rhs) const
 {
-    return (lhs->infos.manhattan_dist() + lhs->depth/lhs->infos.getTam()) > (rhs->infos.manhattan_dist() + rhs->depth/lhs->infos.getTam());
+    int lhs_value = lhs->infos.manhattan_dist() + lhs->depth/lhs->infos.getTam(),
+        rhs_value = rhs->infos.manhattan_dist() + rhs->depth/lhs->infos.getTam();
+    if (lhs_value == rhs_value)
+        return lhs->infos.getKey(true)->operator <(*rhs->infos.getKey(true));
+    else
+        return rhs_value < lhs_value;
 }
 
 BTtree::~BTtree()
