@@ -18,10 +18,11 @@ enum puzzle::zero_movement puzzle::oppositeMovement(enum puzzle::zero_movement d
 	return puzzle::ZERO_NONE;
 }
 
-puzzle::puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementList)
+puzzle::puzzle(const initializer_list<initializer_list<puzzle::element_type>>& elementList)
     : tam(elementList.size())
-    , table(new uint_fast8_t*[tam])
-    , distances(new uint_fast8_t*[tam])
+    , table(new puzzle::element_type*[tam])
+    , storage(new puzzle::element_type[tam * tam])
+    , distances(new puzzle::element_type*[tam])
 {
     int j, i = 0;
 
@@ -30,8 +31,8 @@ puzzle::puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementLi
 		if (it.size() != static_cast<unsigned int>(tam))
             throw -1;
 
-        table[i] = new uint_fast8_t[tam];
-        distances[i] = new uint_fast8_t[tam];
+        table[i] = &storage[i * tam];
+        distances[i] = new puzzle::element_type[tam];
 
         j = 0;
         for(auto piece: it)
@@ -49,16 +50,17 @@ puzzle::puzzle(const initializer_list<initializer_list<uint_fast8_t>>& elementLi
 	compute_manhattan_dist();
 }
 
-puzzle::puzzle(const vector<vector<uint_fast8_t>>& elements)
+puzzle::puzzle(const vector<vector<puzzle::element_type>>& elements)
     : tam(elements.size())
-    , table(new uint_fast8_t*[tam])
-    , distances(new uint_fast8_t*[tam])
+    , table(new puzzle::element_type*[tam])
+    , storage(new puzzle::element_type[tam * tam])
+    , distances(new puzzle::element_type*[tam])
 {
 
     for(unsigned int i = 0; i < elements.size(); ++i)
     {
-        table[i] = new uint_fast8_t[tam];
-        distances[i] = new uint_fast8_t[tam];
+        table[i] = &storage[i * tam];
+        distances[i] = new puzzle::element_type[tam];
 
         for(unsigned int j = 0; j < elements.size(); ++j)
         {
@@ -74,12 +76,13 @@ puzzle::puzzle(const vector<vector<uint_fast8_t>>& elements)
 }
 
 puzzle::puzzle(int tam)
-    : table(new uint_fast8_t*[tam])
-    , distances(new uint_fast8_t*[tam])
+    : table(new puzzle::element_type*[tam])
+    , storage(new puzzle::element_type[tam * tam])
+    , distances(new puzzle::element_type*[tam])
 {
     int i, j;
-    uint_fast8_t aux;
-    vector<uint_fast8_t> random_pieces(tam * tam);
+    puzzle::element_type aux;
+    vector<puzzle::element_type> random_pieces(tam * tam);
 
 	this->tam = tam;
 
@@ -95,8 +98,8 @@ puzzle::puzzle(int tam)
 	// Aloca espaço no vetor (opcional, mas é mais rápido).
 	for (i = 0; i < tam; ++i)
 	{
-        table[i] = new uint_fast8_t[tam];
-        distances[i] = new uint_fast8_t[tam];
+        table[i] = &storage[i * tam];
+        distances[i] = new puzzle::element_type[tam];
 	}
 
 	// Inicializa o quebra-cabeça com valores aleatórios.
@@ -121,14 +124,15 @@ puzzle::puzzle(const puzzle &original)
     , line0(original.line0)
     , column0(original.column0)
     , totalDistance(0)
-    , table(new uint_fast8_t*[tam])
-    , distances(new uint_fast8_t*[tam])
+    , table(new puzzle::element_type*[tam])
+    , storage(new puzzle::element_type[tam * tam])
+    , distances(new puzzle::element_type*[tam])
 {
     int i,j;
     for (i = 0; i < tam; ++i)
 	{
-        table[i] = new uint_fast8_t[tam];
-        distances[i] = new uint_fast8_t[tam];
+        table[i] = &storage[i * tam];
+        distances[i] = new puzzle::element_type[tam];
         for (j = 0; j < tam; ++j)
 		{
 			table[i][j] = original.table[i][j];
@@ -143,10 +147,10 @@ puzzle::~puzzle()
     int i;
     for(i = 0; i < tam; i++)
     {
-        delete [] table[i];
         delete [] distances[i];
     }
     delete [] table;
+    delete [] storage;
     delete [] distances;
 }
 
@@ -270,8 +274,8 @@ string puzzle::toString(){
 }
 
 void puzzle::manhattan_update(int line, int column) {
-    uint_fast8_t value = table[line][column];
-    uint_fast8_t formerDistance = distances[line][column];
+    puzzle::element_type value = table[line][column];
+    puzzle::element_type formerDistance = distances[line][column];
 
 	if (value == 0)
 		distances[line][column] = 0;
