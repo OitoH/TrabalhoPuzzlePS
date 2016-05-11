@@ -10,30 +10,33 @@ using namespace std;
 class BTtree {
 public:
 
-	class node
-	{
+    // Node class
+    class node {
     public:
+        // Node infos
         puzzle infos;
-		enum puzzle::zero_movement movement;
+        enum puzzle::zero_movement moviment;
 		int depth;
 
+        // Constructors
 		node(const puzzle &copy);
-
         node(node *lastNode, enum puzzle::zero_movement thisMovement);
 
-		class priorityCalculator
-		{
+        // Priority calculator for queue
+        class priorityCalculator {
 		public:
             bool operator() (node *lhs, node *rhs) const;
 		};
 	};
 
-	void startDeathRide();
-
+    // Constructors
     BTtree(const puzzle &original);
-
     ~BTtree();
 
+    // Start
+	void startDeathRide();
+
 private:
+    // Pointer to root node
     node *rootNode;
 };

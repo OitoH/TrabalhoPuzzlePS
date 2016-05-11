@@ -4,7 +4,6 @@
 
 // MPI
 #include <mpi.h>
-//#include <openmpi-x86_64/mpi.h>
 
 // Puzzle and solver
 #include "../include/BTtree.h"
@@ -87,6 +86,7 @@ int main(int argc, char *argv[]) {
     // Check if puzzle is solvable
     if(!puzzleToSolve->check_solve()){
         cout << "Nao ha solucao para esse caso, chupa essa manga!" << endl;
+        MPI_Finalize();
         return EXIT_SUCCESS;
 	} else {
         cout << "Caso solucionável!\n";

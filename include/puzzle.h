@@ -19,8 +19,8 @@ public:
 
     typedef uint_fast8_t element_type;
 
-	enum zero_movement
-	{
+    enum zero_movement
+    {
 		ZERO_UP,
 		ZERO_DOWN,
 		ZERO_LEFT,
