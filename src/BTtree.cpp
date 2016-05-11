@@ -1,6 +1,4 @@
 #include "../include/BTtree.h"
-#include <algorithm>
-#include <deque>
 #include <omp.h>
 
 BTtree::node::node(const puzzle &copy)
@@ -24,6 +22,45 @@ BTtree::BTtree(const puzzle &original)
 
 BTtree::~BTtree() {
     delete rootNode;
+}
+
+bool BTtree::generateInitialNodes(unsigned mpi_npes) {
+
+    const enum puzzle::zero_movement movements[4] = {
+        puzzle::ZERO_UP,
+        puzzle::ZERO_DOWN,
+        puzzle::ZERO_LEFT,
+        puzzle::ZERO_RIGHT
+    };
+
+    bool solved = false;
+
+    // Insert initial node
+    globalNodes.push_back(new node(rootNode->infos));
+
+    // Gera nós até possuir no mínimo 3 nós por thread
+    do {
+        node *currentNode = globalNodes.front();
+        globalNodes.pop_front();
+
+        // Checa se já solucionou
+        if(currentNode->infos.manhattan_dist() == 0) {
+            solved = true;
+            solution = currentNode;
+
+        // Se não, realiza todos os movimentos possíveis no zero
+        } else {
+            for(int i=0; i<4; i++) {
+                if(currentNode->moviment != puzzle::oppositeMovement(movements[i]) && currentNode->infos.isMoveValid(movements[i]))
+                    globalNodes.push_back(new node(currentNode, movements[i]));
+            }
+            delete currentNode;
+
+        }
+
+    } while(solved==false && globalNodes.size() < 3*mpi_npes);
+
+    return solved;
 }
 
 void BTtree::startDeathRide() {
@@ -154,6 +191,15 @@ void BTtree::startDeathRide() {
 
     // Liberando memória alocada.
     delete solution;
+}
+
+BTtree::node *BTtree::getSolution() {
+    return solution;
+
+}
+
+deque<BTtree::node *> *BTtree::generatedNodes() {
+    return &globalNodes;
 }
 
 bool BTtree::node::priorityCalculator::operator() (node *lhs, node *rhs) const {

@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <memory>
+#include <algorithm>
+#include <deque>
 
 #include "../include/puzzle.h"
 
@@ -33,10 +35,17 @@ public:
     BTtree(const puzzle &original);
     ~BTtree();
 
-    // Start
+    // Manipulation
+    bool generateInitialNodes(unsigned mpi_npes); // returns 'true' if found a solution
 	void startDeathRide();
+    node *getSolution();
+    deque<node*>* generatedNodes();
 
 private:
     // Pointer to root node
     node *rootNode;
+
+    // Nodes
+    deque<node*> globalNodes;
+    node *solution;
 };
