@@ -1,96 +1,116 @@
+
 #include <iostream>
+#include <chrono>
+
+// MPI
+#include <mpi.h>
+//#include <openmpi-x86_64/mpi.h>
+
+// Puzzle and solver
 #include "../include/BTtree.h"
 #include "../include/puzzle.h"
-#include <chrono>
 
 using namespace std;
 
-int main(){
-	unsigned int tam;
-    char isRandom;
-    puzzle *original = nullptr;
-    chrono::time_point<chrono::high_resolution_clock> beginTime, endTime;
+int main(int argc, char *argv[]) {
 
-    cout << "Voce deseja criar um puzzle aleatorio? ('s' ou 'n')" << endl;
+    // Initialize MPI
+    MPI_Init(&argc, &argv);
 
+    // Get MPI number of processes
+    int npes = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &npes);
+
+    // Get MPI rank
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    // Input: aleatory puzzle?
+    char isRandom = 'n';
+    cout << "Voce deseja criar um puzzle aleatorio? ('s' ou 'n'): ";
     cin >> isRandom;
 
-    while(isRandom != 's' && isRandom != 'n')
-    {
-        cout << "\nEntrada invalida, digite novamente ('s' ou 'n')" << endl;
-
+    // Check input
+    while(isRandom != 's' && isRandom != 'n') {
+        cout << "\nEntrada invalida, digite novamente ('s' ou 'n'): ";
         cin >> isRandom;
     }
 
-    tam = -1;
-
-    cout << "Entre com o tamanho do puzzle" << endl;
-
+    // Input: puzzle size
+    unsigned int tam = -1;
+    cout << "Entre com o tamanho do puzzle: ";
     cin >> tam;
-
-    while(tam <= 0)
-    {
-        cout << "\nTamanho invalido, digite novamente" << endl;
+    while(tam <= 0) {
+        cout << "\nTamanho invalido, digite novamente: ";
         cin >> tam;
     }
 
-    if(isRandom == 's')
-    {
-        beginTime = chrono::high_resolution_clock::now();
-        original = new puzzle(tam);
-    }
-    else
-    {
-        cout << "Digite os valores do puzzle em sequencia sem virgula" << endl;
+    // Create puzzle
+    puzzle *puzzleToSolve = nullptr;
+    if(isRandom == 's') {
+        puzzleToSolve = new puzzle(tam);
 
-        vector<vector<uint_fast8_t>> elementos;
+    } else {
+        cout << "Digite os valores do puzzle em sequencia, sem virgula:" << endl;
 
-        for(unsigned int i = 0; i < tam; ++i)
-        {
-            elementos.push_back(vector<uint_fast8_t>());
-            for(unsigned int j = 0; j < tam; ++j)
-            {
+        // Populate matrix
+        vector<vector<uint_fast8_t>> elements;
+        for(unsigned int i = 0; i < tam; ++i) {
+            elements.push_back(vector<uint_fast8_t>());
+
+            for(unsigned int j = 0; j < tam; ++j) {
                 unsigned int temp;
                 cin >> temp;
-                elementos[i].push_back(static_cast<uint_fast8_t>(temp));
+                elements[i].push_back(static_cast<uint_fast8_t>(temp));
 
-                if(temp >= tam*tam)
-                {
-                    cout << "Entrada invalida, deve ser menor que o tamanho" << endl;
-
-                    return -1;
+                if(temp >= tam*tam) {
+                    cout << "Entrada invalida, deve ser menor que o tamanho!" << endl;
+                    MPI_Finalize();
+                    return EXIT_FAILURE;
                 }
             }
         }
 
-        beginTime = chrono::high_resolution_clock::now();
-        original = new puzzle(elementos);
+        puzzleToSolve = new puzzle(elements);
     }
 
-    if(original == nullptr)
-    {
-        cout << "Erro inesperado de alocacao de memoria" << endl;
-        return -1;
+    // Check allocated puzzle
+    if(puzzleToSolve == nullptr) {
+        cout << "Erro inesperado de alocacao de memoria!" << endl;
+        MPI_Finalize();
+        return EXIT_FAILURE;
     }
 
-	cout << "\n\nQuebra cabeça: " << endl << original->toString();
+    // Show puzzle
+    cout << "\n\nQuebra cabeça: " << endl << puzzleToSolve->toString();
 
-	if(!original->check_solve()){
-		cout << "Nao ha solucao para esse caso, chupa essa manga!" << endl;
-		return 0;
+    // Check if puzzle is solvable
+    if(!puzzleToSolve->check_solve()){
+        cout << "Nao ha solucao para esse caso, chupa essa manga!" << endl;
+        return EXIT_SUCCESS;
 	} else {
-            cout << "Solucionável!\n";
+        cout << "Caso solucionável!\n";
     }
 
+    // Create solver
+    BTtree solver(*puzzleToSolve);
 
-	BTtree solver(*original);
+    chrono::time_point<chrono::high_resolution_clock> beginTime, endTime;
+
+    // Solve (and compute time)
+    beginTime = chrono::high_resolution_clock::now();
 	solver.startDeathRide();
-
     endTime = chrono::high_resolution_clock::now();
+
+    // Show time
     chrono::duration<double> responseTime = chrono::duration_cast<chrono::duration<double>>(endTime - beginTime);
     cout << "Tempo de resposta: " << responseTime.count()  << " segundos." << endl;
 
-    delete original;
+    // Delete puzzle
+    delete puzzleToSolve;
+
+    // Finalize MPI
+    MPI_Finalize();
 
 	return 0;
 }
