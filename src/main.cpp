@@ -5,6 +5,9 @@
 // MPI
 #include <mpi.h>
 
+// OMP
+#include <omp.h>
+
 // Puzzle and solver
 #include "../include/BTtree.h"
 #include "../include/puzzle.h"
@@ -15,6 +18,9 @@ using namespace std;
 #define CMD_INIT_OK 1
 #define CMD_INIT_ABORT 2
 #define CMD_STARTRESOLUTION 3
+#define CMD_SOLVED 3
+
+#define MASTER_RANK 0
 
 void bcastInitOK() {
     int cmd = CMD_INIT_OK;
@@ -31,6 +37,103 @@ void bcastStartResolution() {
     MPI_Bcast(&cmd, 1, MPI_INTEGER, 0, MPI_COMM_WORLD);
 }
 
+void sendSolved(int sourceSolved, int npes) {
+    for(int i=1; i<npes; i++) {
+        if(i!=sourceSolved) {
+            int cmd = CMD_SOLVED;
+            MPI_Send(&cmd, 1, MPI_INTEGER, i, 0, MPI_COMM_WORLD);
+        }
+    }
+}
+
+void startResolution(BTtree &solver, int rank, int npes) {
+    MPI_Status status;
+
+    // Shared
+    int numProcessSolved = -1;
+    int solutionDepth = 0;
+    bool solved = false;
+
+    // Start 2 threads
+    bool keepRunning = true;
+    #pragma omp parallel private(status), shared(solver, solved, keepRunning, numProcessSolved, solutionDepth) num_threads(2)
+    {
+        // Get OpenMP infos
+        int omp_myID = omp_get_thread_num();
+
+        // Swich based on thread
+        if(omp_myID==0) {
+            int cmd;
+
+            MPI_Request request;
+            if(rank==MASTER_RANK)
+                MPI_Irecv(&cmd, 1, MPI_INTEGER, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &request);
+            else
+                MPI_Irecv(&cmd, 1, MPI_INTEGER, MASTER_RANK, 0, MPI_COMM_WORLD, &request);
+
+            // Non-blocking wait
+            while(solved==false) {
+                int received = 0;
+                MPI_Test(&request, &received, &status);
+                if(received)
+                    break;
+            }
+
+            // Check cmd
+            if(cmd==CMD_SOLVED) {
+                keepRunning = false;
+
+                // If received solved, and it's master, inform all threads
+                if(rank==MASTER_RANK) {
+                    // Get source
+                    numProcessSolved = status.MPI_SOURCE;
+
+                    // Receive solution depth
+                    MPI_Recv(&solutionDepth, 1, MPI_INTEGER, numProcessSolved, 0, MPI_COMM_WORLD, &status);
+
+                    // Inform all processes
+                    sendSolved(numProcessSolved, npes);
+                }
+            }
+
+        } else {
+            // Start resolution
+            solved = solver.startDeathRide(&keepRunning);
+
+            // If solved
+            if(solved) {
+                // If master, inform all slaves
+                if(rank==MASTER_RANK) {
+                    numProcessSolved = MASTER_RANK;
+                    solutionDepth = solver.getSolutionDepth();
+                    sendSolved(MASTER_RANK, npes);
+
+                // If slave, inform master
+                } else {
+                    MPI_Request request;
+
+                    // Inform
+                    int cmd = CMD_SOLVED;
+                    MPI_Isend(&cmd, 1, MPI_INTEGER, MASTER_RANK, 0, MPI_COMM_WORLD, &request);
+
+                    // Send solution depth
+                    int depth = solver.getSolutionDepth();
+                    MPI_Isend(&depth, 1, MPI_INTEGER, MASTER_RANK, 0, MPI_COMM_WORLD, &request);
+                }
+            }
+
+        }
+
+        #pragma omp barrier
+    }
+
+    // Print which process solved the puzzle
+    if(rank==MASTER_RANK) {
+        std::cout << "Processo #" << numProcessSolved << " resolveu o puzzle! (profundidade: " << solutionDepth << ")\n";
+    }
+
+}
+
 int main(int argc, char *argv[]) {
     MPI_Status status;
 
@@ -44,7 +147,6 @@ int main(int argc, char *argv[]) {
     // Get MPI rank
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    const int masterRank = 0;
 
     // Master process: get user input and start distribution to slaves
     if(rank==0) {
@@ -117,8 +219,10 @@ int main(int argc, char *argv[]) {
             MPI_Finalize();
             return EXIT_SUCCESS;
         } else {
-            cout << "Caso solucionável!\n";
+            cout << "Caso solucionável!\n\n";
         }
+
+        cout << "Procurando solução...\n\n";
 
         // Create solver
         BTtree solver(*puzzleToSolve);
@@ -138,8 +242,6 @@ int main(int argc, char *argv[]) {
             // Recupera os nodes
             deque<BTtree::node*>* globalNodes = solver.generatedNodes();
 
-            std::cout << "Master generated " << globalNodes->size() << " nodes.\n";
-
             // Envia um nó para cada processo
             for(int i=0; i<npes-1; i++) {
                 int dest = i+1;
@@ -155,13 +257,11 @@ int main(int argc, char *argv[]) {
                 MPI_Send(puzz, tam*tam, MPI_INTEGER, dest, 0, MPI_COMM_WORLD);
             }
 
-            std::cout << "Still " << globalNodes->size() << " nodes for master!\n";
-
             // Dispara resolução
             bcastStartResolution();
 
-            // Começa resolução individual do master
-            solver.startDeathRide();
+            // Inicia resolução
+            startResolution(solver, rank, npes);
 
         // Se resolveu
         } else {
@@ -172,7 +272,7 @@ int main(int argc, char *argv[]) {
 
         // Show time
         chrono::duration<double> responseTime = chrono::duration_cast<chrono::duration<double>>(endTime - beginTime);
-        cout << "\nTempo de resposta: " << responseTime.count()  << " segundos." << endl;
+        cout << "Tempo de resposta: " << responseTime.count()  << " segundos." << endl;
 
         // Delete puzzle
         delete puzzleToSolve;
@@ -182,22 +282,16 @@ int main(int argc, char *argv[]) {
 
         // Recv initial confirmation
         int cmd = 0;
-        MPI_Bcast(&cmd, 1, MPI_INTEGER, masterRank, MPI_COMM_WORLD);
+        MPI_Bcast(&cmd, 1, MPI_INTEGER, MASTER_RANK, MPI_COMM_WORLD);
         if(cmd==CMD_INIT_OK) {
 
             // Receive number of nodes (numNodes)
             int tam=0;
-            MPI_Recv(&tam, 1, MPI_INTEGER, masterRank, 0, MPI_COMM_WORLD, &status);
-            std::cout << "process #" << rank << ", received tam: " << tam << "\n";
+            MPI_Recv(&tam, 1, MPI_INTEGER, MASTER_RANK, 0, MPI_COMM_WORLD, &status);
 
             // Receive node
             puzzle::element_type puzz[tam*tam];
-            MPI_Recv(puzz, tam*tam, MPI_INTEGER, masterRank, 0, MPI_COMM_WORLD, &status);
-            std::cout << "process #" << rank << ", received node:\n";
-            for(int i=0; i<tam*tam; i++) {
-                std::cout << puzz[i] << " ";
-            }
-            std::cout << "\n";
+            MPI_Recv(puzz, tam*tam, MPI_INTEGER, MASTER_RANK, 0, MPI_COMM_WORLD, &status);
 
             // Create puzzle with node
             puzzle *p = new puzzle(puzz, tam);
@@ -206,18 +300,13 @@ int main(int argc, char *argv[]) {
             BTtree solver(*p);
 
             // Wait for command to start resolution
-            MPI_Bcast(&cmd, 1, MPI_INTEGER, masterRank, MPI_COMM_WORLD);
-            if(cmd==CMD_STARTRESOLUTION) {
-                std::cout << "process #" << rank << ", received cmd start resolution!\n";
-            }
-
-            // Start slave resolution
-            solver.startDeathRide();
+            MPI_Bcast(&cmd, 1, MPI_INTEGER, MASTER_RANK, MPI_COMM_WORLD);
+            if(cmd==CMD_STARTRESOLUTION)
+                startResolution(solver, rank, npes);
 
         }
 
     }
-
 
     // Finalize MPI
     MPI_Finalize();

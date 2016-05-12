@@ -38,9 +38,11 @@ public:
 
     // Manipulation
     bool generateInitialNodes(unsigned mpi_npes); // returns 'true' if found a solution
-	void startDeathRide();
-    node *getSolution();
+    bool startDeathRide(bool *keepRunning);
+
     deque<node*>* generatedNodes();
+    node *getSolution();
+    int getSolutionDepth();
 
 private:
     // Pointer to root node
@@ -49,7 +51,6 @@ private:
     // Nodes
     deque<node*> globalNodes;
     node *solution;
-
-    // Unexplored nodes
+    int solutionDepth;
 
 };

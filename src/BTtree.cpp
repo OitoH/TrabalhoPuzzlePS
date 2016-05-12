@@ -67,7 +67,7 @@ bool BTtree::generateInitialNodes(unsigned mpi_npes) {
     return solved;
 }
 
-void BTtree::startDeathRide() {
+bool BTtree::startDeathRide(bool *keepRunning) {
 
     const enum puzzle::zero_movement movements[4] = {
 		puzzle::ZERO_UP,
@@ -137,7 +137,7 @@ void BTtree::startDeathRide() {
 
                 // Inicia exploração.
                 // Enquanto uma solução definitiva não foi encontrada.
-                while(solved==false) {
+                while(solved==false && *keepRunning) {
 
                     // Explora o nó de maior prioridade.
                     currentNode = unexploredNodes.front();
@@ -190,15 +190,23 @@ void BTtree::startDeathRide() {
         #pragma omp barrier
     }
 
-    // Exibe resultado
-    cout << "Resultado:\tProfundidade:" << solution->depth << "\n" << solution->infos.toString() << endl;
+    // Guarda profundidade
+    if(solved)
+        solutionDepth = solution->depth;
 
     // Liberando memória alocada.
     delete solution;
+
+    return (keepRunning && solved);
 }
 
 BTtree::node *BTtree::getSolution() {
     return solution;
+
+}
+
+int BTtree::getSolutionDepth() {
+    return solutionDepth;
 
 }
 
