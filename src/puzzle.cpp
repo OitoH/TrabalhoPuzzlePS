@@ -47,7 +47,34 @@ puzzle::puzzle(const initializer_list<initializer_list<puzzle::element_type>>& e
         }
         ++i;
     }
-	compute_manhattan_dist();
+    compute_manhattan_dist();
+}
+
+puzzle::puzzle(puzzle::element_type *puzz, int tam) {
+    this->tam = tam;
+    this->table = new puzzle::element_type*[tam];
+    this->storage = new puzzle::element_type[tam * tam];
+    this->distances = new puzzle::element_type*[tam];
+
+    for(int i=0; i<tam; i++) {
+
+        table[i] = &storage[i * tam];
+        distances[i] = new puzzle::element_type[tam];
+
+        for(int j=0; j<tam; j++) {
+            int piece = puzz[i*tam+j];
+
+            if(piece == 0) {
+                line0 = i;
+                column0 = j;
+            }
+
+            table[i][j] = piece;
+        }
+
+    }
+
+    compute_manhattan_dist();
 }
 
 puzzle::puzzle(const vector<vector<puzzle::element_type>>& elements)

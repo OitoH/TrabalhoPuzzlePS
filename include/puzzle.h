@@ -17,7 +17,8 @@ class puzzle {
 
 public:
 
-    typedef uint_fast8_t element_type;
+    //typedef uint_fast8_t element_type;
+    typedef int element_type;
 
     enum zero_movement
     {
@@ -31,6 +32,8 @@ public:
 	static enum zero_movement oppositeMovement(enum zero_movement dir);
 
     puzzle(const initializer_list<initializer_list<element_type>>& elementList);
+
+    puzzle(element_type *puzz, int tam);
 
     puzzle(const vector<vector<element_type>>& elements);
 
@@ -59,6 +62,8 @@ public:
 	int inversion();
 
     string toString();
+
+    element_type* getPuzzle() { return storage; }
 
 private:
 	void compute_manhattan_dist();

@@ -20,6 +20,10 @@ BTtree::BTtree(const puzzle &original)
 
 }
 
+BTtree::BTtree() {
+    rootNode = NULL;
+}
+
 BTtree::~BTtree() {
     delete rootNode;
 }
@@ -58,7 +62,7 @@ bool BTtree::generateInitialNodes(unsigned mpi_npes) {
 
         }
 
-    } while(solved==false && globalNodes.size() < 3*mpi_npes);
+    } while(solved==false && globalNodes.size() < mpi_npes);
 
     return solved;
 }

@@ -14,6 +14,7 @@ using namespace std;
 #define CMD_UNDEFINED 0
 #define CMD_INIT_OK 1
 #define CMD_INIT_ABORT 2
+#define CMD_STARTRESOLUTION 3
 
 void bcastInitOK() {
     int cmd = CMD_INIT_OK;
@@ -22,6 +23,11 @@ void bcastInitOK() {
 
 void bcastInitAbort() {
     int cmd = CMD_INIT_ABORT;
+    MPI_Bcast(&cmd, 1, MPI_INTEGER, 0, MPI_COMM_WORLD);
+}
+
+void bcastStartResolution() {
+    int cmd = CMD_STARTRESOLUTION;
     MPI_Bcast(&cmd, 1, MPI_INTEGER, 0, MPI_COMM_WORLD);
 }
 
@@ -72,14 +78,14 @@ int main(int argc, char *argv[]) {
             cout << "Digite os valores do puzzle em sequencia, sem virgula:" << endl;
 
             // Populate matrix
-            vector<vector<uint_fast8_t>> elements;
+            vector<vector<puzzle::element_type>> elements;
             for(unsigned int i = 0; i < tam; ++i) {
-                elements.push_back(vector<uint_fast8_t>());
+                elements.push_back(vector<puzzle::element_type>());
 
                 for(unsigned int j = 0; j < tam; ++j) {
                     unsigned int temp;
                     cin >> temp;
-                    elements[i].push_back(static_cast<uint_fast8_t>(temp));
+                    elements[i].push_back(static_cast<puzzle::element_type>(temp));
 
                     if(temp >= tam*tam) {
                         cout << "Entrada invalida, deve ser menor que o tamanho!" << endl;
@@ -129,14 +135,33 @@ int main(int argc, char *argv[]) {
             // Confirma
             bcastInitOK();
 
-            // Envia os nós igualmente para os processos
+            // Recupera os nodes
+            deque<BTtree::node*>* globalNodes = solver.generatedNodes();
 
+            std::cout << "Master generated " << globalNodes->size() << " nodes.\n";
+
+            // Envia um nó para cada processo
+            for(int i=0; i<npes-1; i++) {
+                int dest = i+1;
+
+                // Envia tam
+                MPI_Send(&tam, 1, MPI_INTEGER, dest, 0, MPI_COMM_WORLD);
+
+                // Envia o nó
+                BTtree::node *node = globalNodes->back();
+                globalNodes->pop_back();
+
+                puzzle::element_type *puzz = node->infos.getPuzzle();
+                MPI_Send(puzz, tam*tam, MPI_INTEGER, dest, 0, MPI_COMM_WORLD);
+            }
+
+            std::cout << "Still " << globalNodes->size() << " nodes for master!\n";
 
             // Dispara resolução
+            bcastStartResolution();
 
-
-            // Começa resolução individual
-//            solver.startDeathRide();
+            // Começa resolução individual do master
+            solver.startDeathRide();
 
         // Se resolveu
         } else {
@@ -161,10 +186,33 @@ int main(int argc, char *argv[]) {
         if(cmd==CMD_INIT_OK) {
 
             // Receive number of nodes (numNodes)
-            int numNodes=0;
+            int tam=0;
+            MPI_Recv(&tam, 1, MPI_INTEGER, masterRank, 0, MPI_COMM_WORLD, &status);
+            std::cout << "process #" << rank << ", received tam: " << tam << "\n";
 
-            // Receive the 'numNodes' nodes
+            // Receive node
+            puzzle::element_type puzz[tam*tam];
+            MPI_Recv(puzz, tam*tam, MPI_INTEGER, masterRank, 0, MPI_COMM_WORLD, &status);
+            std::cout << "process #" << rank << ", received node:\n";
+            for(int i=0; i<tam*tam; i++) {
+                std::cout << puzz[i] << " ";
+            }
+            std::cout << "\n";
 
+            // Create puzzle with node
+            puzzle *p = new puzzle(puzz, tam);
+
+            // Create solver
+            BTtree solver(*p);
+
+            // Wait for command to start resolution
+            MPI_Bcast(&cmd, 1, MPI_INTEGER, masterRank, MPI_COMM_WORLD);
+            if(cmd==CMD_STARTRESOLUTION) {
+                std::cout << "process #" << rank << ", received cmd start resolution!\n";
+            }
+
+            // Start slave resolution
+            solver.startDeathRide();
 
         }
 

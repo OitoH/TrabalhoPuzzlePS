@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <iostream>
 #include <memory>
@@ -33,6 +33,7 @@ public:
 
     // Constructors
     BTtree(const puzzle &original);
+    BTtree();
     ~BTtree();
 
     // Manipulation
@@ -48,4 +49,7 @@ private:
     // Nodes
     deque<node*> globalNodes;
     node *solution;
+
+    // Unexplored nodes
+
 };
