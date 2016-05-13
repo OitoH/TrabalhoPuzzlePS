@@ -10,13 +10,31 @@ CL = $(wildcard src/*.cpp)    #cpp list
 HL = $(wildcard include/*.h)    #header list
 OL = $(patsubst src/%.cpp, obj/%.o, $(CL) )  #object list
 
-all: $(OL); $(CC) $(CFLAGS) $(OL) $(LIBS) $(INCLUDE) -o main
+all: GeradorDeTestes main
+
+main: $(OL); $(CC) $(CFLAGS) $(OL) $(LIBS) $(INCLUDE) -o main 
 
 obj:
 	mkdir -p obj
 
 obj/%.o: src/%.cpp obj; $(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-run: ; ./main
+GeradorDeTestes:
+	qmake GeradorTestes/GeradorTestes.pro -r -spec linux-g++ -o GeradorTestes/Makefile
+	$(MAKE) -C GeradorTestes MAKEFLAGS=
+	mv GeradorTestes/GeradorTestes ./GeradorDeTestes
 
-clean: ; rm -f $(wildcard obj/*.o) main
+.PHONY: puzzle
+puzzle: main
+
+.PHONY: run
+run: ; ./main
+	
+.PHONY: clean
+clean:
+	rm -f $(wildcard obj/*.o) main
+	$(MAKE) -C GeradorTestes $@
+	rm -f GeradorDeTestes
+
+.PHONY: gerador
+gerador: GeradorDeTestes
