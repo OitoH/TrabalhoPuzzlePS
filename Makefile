@@ -12,7 +12,7 @@ OL = $(patsubst src/%.cpp, obj/%.o, $(CL) )  #object list
 
 all: GeradorDeTestes main
 
-main: $(OL); $(CC) $(CFLAGS) $(OL) $(LIBS) $(INCLUDE) -o main 
+main: $(OL); $(CC) $(CFLAGS) $(OL) $(LIBS) $(INCLUDE) -o main
 
 obj:
 	mkdir -p obj
@@ -29,7 +29,7 @@ puzzle: main
 
 .PHONY: run
 run: ; ./main
-	
+
 .PHONY: clean
 clean:
 	rm -f $(wildcard obj/*.o) main

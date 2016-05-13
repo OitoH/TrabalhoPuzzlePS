@@ -99,10 +99,11 @@ void MainWindow::on_saveButton_released()
     QFile file(ui->filenameLineEdit->text());
     file.open(QIODevice::WriteOnly);
     QTextStream fileStream(&file);
-    fileStream << "n\n";
-    for(int row = ui->puzzleTable->rowCount() - 1; row > -1; --row) {
-        for(int column = ui->puzzleTable->columnCount() - 1; column > -1 ; --column) {
-            fileStream << " " << ui->puzzleTable->item(row, column)->text();
+    int rowCount = ui->puzzleTable->rowCount();
+    fileStream << "n\n" << rowCount << "\n";
+    for(int row = 0; row < rowCount; ++row) {
+        for(int column = 0; column < rowCount; ++column) {
+            fileStream << " " << ui->puzzleTable->item(row, column)->text() << " ";
         }
     }
     fileStream << "\n";
