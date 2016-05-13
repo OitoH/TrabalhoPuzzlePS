@@ -83,7 +83,7 @@ bool BTtree::startDeathRide(bool *keepRunning) {
     vector<node *> unexploredNodes;
     node *currentNode, *solution = nullptr;
 
-    #pragma omp parallel private(i, threadsNum, myID, unexploredNodes, currentNode), shared(globalNodes, solved, solution)
+    #pragma omp parallel private(i, threadsNum, myID, unexploredNodes, currentNode), shared(globalNodes, solved, solution) num_threads(4)
     {
         // Get OpenMP infos
         threadsNum = omp_get_num_threads();
