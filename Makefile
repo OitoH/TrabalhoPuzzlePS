@@ -10,7 +10,7 @@ CL = $(wildcard src/*.cpp)    #cpp list
 HL = $(wildcard include/*.h)    #header list
 OL = $(patsubst src/%.cpp, obj/%.o, $(CL) )  #object list
 
-all: GeradorDeTestes main
+all: main
 
 main: $(OL); $(CC) $(CFLAGS) $(OL) $(LIBS) $(INCLUDE) -o main
 
