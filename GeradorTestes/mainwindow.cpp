@@ -6,6 +6,8 @@
 #include <random>
 #include <QFile>
 #include <QTextStream>
+#include <QProcess>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -85,6 +87,11 @@ void MainWindow::on_puzzleTable_itemChanged(QTableWidgetItem *item)
     }
     else
     {
+        int rowCount = ui->puzzleTable->rowCount();
+        rowCount *= rowCount;
+        QMessageBox::warning(this, "Erro!",
+                             QString("Digite um número entre 0 e ").append(QString::number(rowCount - 1)),
+                             QMessageBox::Ok, QMessageBox::Ok);
         item->setText(QString::number(toChange));
     }
 }
@@ -94,11 +101,9 @@ void MainWindow::on_puzzleTable_itemDoubleClicked(QTableWidgetItem *item)
     toChange = item->text().toInt();
 }
 
-void MainWindow::on_saveButton_released()
+void MainWindow::writePuzzleToFile(QIODevice *device)
 {
-    QFile file(ui->filenameLineEdit->text());
-    file.open(QIODevice::WriteOnly);
-    QTextStream fileStream(&file);
+    QTextStream fileStream(device);
     int rowCount = ui->puzzleTable->rowCount();
     fileStream << "n\n" << rowCount << "\n";
     for(int row = 0; row < rowCount; ++row) {
@@ -109,7 +114,33 @@ void MainWindow::on_saveButton_released()
     fileStream << "\n";
 }
 
+void MainWindow::on_saveButton_released()
+{
+    QFile file(ui->filenameLineEdit->text());
+    file.open(QIODevice::WriteOnly);
+    writePuzzleToFile(&file);
+}
+
 void MainWindow::on_randomButton_released()
 {
     initializeTable(true);
+}
+
+void MainWindow::on_runButton_released()
+{
+    QProcess *puzzleSolver = new QProcess(this);
+    puzzleSolver->start(ui->commandLineEdit->text());
+    writePuzzleToFile(puzzleSolver);
+    puzzleSolver->waitForFinished();
+    if (puzzleSolver->exitCode() == QProcess::CrashExit)
+    {
+        QMessageBox::warning(this, "Erro inesperado na execução", "O processo executado terminou de forma inesperada", QMessageBox::Ok, QMessageBox::Ok);
+    }
+    else
+    {
+        QString output(puzzleSolver->readAllStandardOutput());
+        if (output.endsWith("segundos.") || output.endsWith("manga!"))
+            output.append(puzzleSolver->errorString());
+        QMessageBox::information(this, "Execução concluída", output, QMessageBox::Ok, QMessageBox::Ok);
+    }
 }

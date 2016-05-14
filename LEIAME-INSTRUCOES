@@ -6,8 +6,11 @@ Para gerar o programa que resolve puzzles execute:
 Para gerar o programa que gera casos de teste para o puzzle, aviso: é preciso ter a biblioteca QT instalada, versão 4 ou superior:
     make gerador
     
+O gerador permite fornecer um comando de terminal por meio do qual será executado o programa do puzzle, caso o comando seja outro, o comportamento é indefinido. 
+    
 Para realizar um teste com os arquivos gerados pelo gerador, execute:
-    cat nomeDoArquivo | ./main
+    cat nomeDoArquivo | comandoQueExecutaProgramaPuzzle
+    Ex: cat puzzle.txt | ./main
 
 Para gerar ambos os programas execute
     make

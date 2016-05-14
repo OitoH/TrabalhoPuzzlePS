@@ -29,12 +29,15 @@ private slots:
 
     void on_randomButton_released();
 
+    void on_runButton_released();
+
 private:
     Ui::MainWindow *ui;
     int toChange;
     std::unordered_map<int, std::pair<int, int>> position;
     void initializeTable(bool random = false);
     bool isValid(int piece);
+    void writePuzzleToFile(QIODevice *device);
 };
 
 #endif // MAINWINDOW_H
