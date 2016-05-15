@@ -28,7 +28,7 @@ GeradorDeTestes:
 puzzle: main
 
 .PHONY: run
-run: ; ./main
+run: ; mpirun -np 40 --bind-to none --hostfile hostfile main
 
 .PHONY: clean
 clean:
