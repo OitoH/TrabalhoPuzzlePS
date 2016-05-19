@@ -23,13 +23,13 @@ private slots:
 
     void on_puzzleTable_itemChanged(QTableWidgetItem *item);
 
-    void on_puzzleTable_itemDoubleClicked(QTableWidgetItem *item);
-
     void on_saveButton_released();
 
     void on_randomButton_released();
 
     void on_runButton_released();
+
+    void on_puzzleTable_itemSelectionChanged();
 
 private:
     Ui::MainWindow *ui;

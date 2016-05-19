@@ -21,7 +21,7 @@ obj/%.o: src/%.cpp obj; $(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 GeradorDeTestes:
 	qmake GeradorTestes/GeradorTestes.pro -r -spec linux-g++ -o GeradorTestes/Makefile
-	$(MAKE) -C GeradorTestes MAKEFLAGS=
+	$(MAKE) -C GeradorTestes
 	mv GeradorTestes/GeradorTestes ./GeradorDeTestes
 
 .PHONY: puzzle

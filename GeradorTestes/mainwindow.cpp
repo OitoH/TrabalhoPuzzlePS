@@ -84,6 +84,7 @@ void MainWindow::on_puzzleTable_itemChanged(QTableWidgetItem *item)
         position[toChange] = newItemOldPosition;
         ui->puzzleTable->item(newItemOldPosition.first, newItemOldPosition.second)->setText(QString::number(toChange));
         position[newItem] = std::pair<int, int>(item->row(), item->column());
+        toChange = newItem;
     }
     else
     {
@@ -94,11 +95,6 @@ void MainWindow::on_puzzleTable_itemChanged(QTableWidgetItem *item)
                              QMessageBox::Ok, QMessageBox::Ok);
         item->setText(QString::number(toChange));
     }
-}
-
-void MainWindow::on_puzzleTable_itemDoubleClicked(QTableWidgetItem *item)
-{
-    toChange = item->text().toInt();
 }
 
 void MainWindow::writePuzzleToFile(QIODevice *device)
@@ -131,6 +127,8 @@ void MainWindow::on_runButton_released()
     QProcess *puzzleSolver = new QProcess(this);
     puzzleSolver->start(ui->commandLineEdit->text());
     writePuzzleToFile(puzzleSolver);
+    QString oldTitle = this->windowTitle();
+    this->setWindowTitle(this->windowTitle().append(" - Executando, aguarde !"));
     puzzleSolver->waitForFinished();
     if (puzzleSolver->exitCode() == QProcess::CrashExit)
     {
@@ -143,4 +141,10 @@ void MainWindow::on_runButton_released()
             output.append(puzzleSolver->errorString());
         QMessageBox::information(this, "Execução concluída", output, QMessageBox::Ok, QMessageBox::Ok);
     }
+    this->setWindowTitle(oldTitle);
+}
+
+void MainWindow::on_puzzleTable_itemSelectionChanged()
+{
+    toChange = ui->puzzleTable->currentItem()->text().toInt();
 }
